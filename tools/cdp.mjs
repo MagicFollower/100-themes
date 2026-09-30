@@ -45,9 +45,12 @@ export async function launch() {
     return { evaluate, close: () => ws.close() };
   }
 
-  function close() {
+  // Wait for Chromium to exit, so it does not write to the profile during the removal.
+  async function close() {
+    const exited = new Promise(r => chrome.once('exit', r));
     chrome.kill();
-    rmSync(profile, { recursive: true, force: true });
+    await exited;
+    rmSync(profile, { recursive: true, force: true, maxRetries: 5 });
   }
 
   return { open, close };

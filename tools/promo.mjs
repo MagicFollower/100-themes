@@ -82,4 +82,4 @@ ffmpeg.stdin.end();
 await new Promise(r => ffmpeg.on('close', r));
 process.stdout.write(`\nwrote ${OUT} (${seconds.toFixed(1)}s)\n`);
 page.close();
-browser.close();
+await browser.close();

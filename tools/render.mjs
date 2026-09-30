@@ -59,5 +59,5 @@ await Promise.all(Array.from({ length: Math.min(WORKERS, queue.length) }, async 
   page.close();
 }));
 process.stdout.write('\n');
-browser.close();
+await browser.close();
 rmSync(scratch, { recursive: true, force: true });
