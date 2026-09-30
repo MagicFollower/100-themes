@@ -5,6 +5,7 @@
 This repo has 100 dark themes for [Omarchy](https://omarchy.org). Each theme has a 16-color ANSI palette, a background with the Omarchy wordmark, and a background drawn for its colors.
 
 - Gallery: [bjarneo.github.io/100-themes](https://bjarneo.github.io/100-themes)
+- Promo video: [`assets/promo.mp4`](assets/promo.mp4)
 - Themes: 100 folders at the root of this repo, one folder for each theme.
 
 ## Install
@@ -34,7 +35,7 @@ cd ~/.local/share/100-themes
 omarchy theme set synthwave
 ```
 
-The full repo is about 150 MB because it has 200 backgrounds at 3840×2160.
+The full repo is about 180 MB because it has 200 backgrounds at 3840×2160.
 
 ### Options
 
@@ -154,7 +155,7 @@ The `tools/` folder has every script that made this repo. You need Node.js 22 or
 | `node tools/build.mjs` | Writes `colors.toml`, `icons.theme` and `assets/themes.js` |
 | `node tools/render.mjs [theme...]` | Renders the backgrounds with headless Chromium |
 | `tools/capture.sh [theme...]` | Applies each theme, takes a screenshot of workspace 7, and writes `preview.png` |
-| `node tools/promo.mjs <song.mp3>` | Renders a promo video to `assets/promo.mp4` with one theme per beat. Git ignores this file. |
+| `node tools/promo.mjs <song.mp3>` | Renders `assets/promo.mp4` with one theme per beat |
 | `node tools/readme.mjs` | Writes this README |
 
 `tools/capture.sh` changes your desktop while it runs. It switches to workspace 7 and applies each theme. When it stops, it applies your original theme again and removes the links that it added. If another workspace becomes active, the script stops before it takes a screenshot.

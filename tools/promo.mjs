@@ -61,8 +61,8 @@ const ffmpeg = spawn('ffmpeg', [
   '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'mjpeg', '-i', '-',
   '-i', SONG,
   '-map', '0:v', '-map', '1:a',
-  '-c:v', 'libx264', '-preset', 'slow', '-crf', '20', '-pix_fmt', 'yuv420p',
-  '-c:a', 'aac', '-b:a', '192k', '-af', `afade=t=out:st=${(seconds - 3).toFixed(2)}:d=3`,
+  '-c:v', 'libx264', '-preset', 'slow', '-crf', '26', '-pix_fmt', 'yuv420p',
+  '-c:a', 'aac', '-b:a', '160k', '-af', `afade=t=out:st=${(seconds - 3).toFixed(2)}:d=3`,
   '-t', seconds.toFixed(3), '-movflags', '+faststart', OUT,
 ], { stdio: ['pipe', 'inherit', 'inherit'] });
 
