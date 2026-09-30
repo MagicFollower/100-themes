@@ -92,7 +92,7 @@ fetch() {
   [[ -n $SOURCE ]] && return
   command -v git >/dev/null || die "git is not installed. Install git, then run the script again."
   tmp=$(mktemp -d)
-  say "Downloading from $REPO_URL"
+  warn "Downloading from $REPO_URL"
   git clone --quiet --depth 1 --filter=blob:none --sparse "$REPO_URL" "$tmp/repo"
   tmp="$tmp/repo"
   if (( $# > 0 )); then
@@ -179,7 +179,7 @@ if (( all )); then
   if [[ -z $SOURCE ]]; then
     command -v git >/dev/null || die "git is not installed. Install git, then run the script again."
     tmp=$(mktemp -d)
-    say "Downloading all themes from $REPO_URL"
+    warn "Downloading all themes from $REPO_URL"
     git clone --quiet --depth 1 "$REPO_URL" "$tmp/repo"
     tmp="$tmp/repo"
   fi
