@@ -91,6 +91,7 @@ h1 em { font-style: normal; background: linear-gradient(90deg, var(--cyan), var(
   background: var(--surface); border: 1px solid var(--line); overflow-x: auto;
   font: 13px/1.7 'JetBrains Mono', monospace; color: var(--text-2);
 }
+.code:has(.copy) { padding-top: 46px; }
 .code .c { color: var(--muted); }
 .code .p { color: var(--magenta); user-select: none; }
 .copy {
@@ -109,7 +110,7 @@ h2 { margin: 0 0 6px; font-size: clamp(22px, 2.6vw, 30px); letter-spacing: -.01e
   border: 1px solid var(--line); background: #000;
 }
 .install-grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); }
-:not(pre) > code { color: var(--text); background: var(--surface-2); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-size: .92em; }
+:not(pre) > code { white-space: nowrap; color: var(--text); background: var(--surface-2); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-size: .92em; }
 .install-grid h3 { margin: 0 0 10px; font-size: 14px; color: var(--text); }
 
 /* Gallery */
@@ -151,7 +152,7 @@ dialog {
 }
 dialog::backdrop { background: rgba(3, 3, 8, .82); backdrop-filter: blur(4px); }
 .d-body { display: grid; grid-template-columns: minmax(0, 1.9fr) minmax(280px, 1fr); }
-.d-media { background: #000; display: flex; flex-direction: column; min-width: 0; }
+.d-media { background: var(--d-darker, #000); display: flex; flex-direction: column; min-width: 0; }
 .d-media img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: contain; background: #000; }
 .tabs { display: flex; gap: 4px; padding: 10px; flex-wrap: wrap; background: var(--d-darker, #000); }
 .tab { cursor: pointer; padding: 7px 11px; border-radius: 8px; font-size: 12px; border: 1px solid transparent; background: none; color: var(--d-dim, var(--muted)); }
@@ -172,6 +173,16 @@ dialog::backdrop { background: rgba(3, 3, 8, .82); backdrop-filter: blur(4px); }
 .label { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--d-dim); margin-bottom: 8px; }
 dialog .code { background: var(--d-darker); border-color: var(--d-line); color: var(--d-fg); font-size: 12px; }
 dialog .copy { background: var(--d-bg); border-color: var(--d-line); color: var(--d-fg); }
+.aether { display: flex; flex-wrap: wrap; gap: 8px; }
+.a-btn {
+  cursor: pointer; padding: 9px 12px; border-radius: 8px; font-size: 12px; font-weight: 700;
+  border: 1px solid var(--d-line); color: var(--d-fg); background: none;
+}
+.a-btn:hover { border-color: var(--d-accent); color: var(--d-fg); }
+.a-btn.primary { background: var(--d-accent); border-color: var(--d-accent); color: var(--d-darker); }
+.a-btn.primary:hover { color: var(--d-darker); filter: brightness(1.1); }
+.hint { margin: 8px 0 0; font-size: 11.5px; line-height: 1.5; color: var(--d-dim); }
+.hint a { color: var(--d-cyan); }
 .files { display: flex; flex-wrap: wrap; gap: 8px 14px; font-size: 13px; }
 .files a { color: var(--d-cyan); }
 .d-nav { display: flex; gap: 8px; margin-top: auto; }
@@ -267,6 +278,12 @@ omarchy theme set synthwave">Copy</button><span class="p">$ </span>git clone --d
 <span class="p">$ </span>omarchy theme set synthwave</pre>
         </div>
       </div>
+      <div class="install-grid" style="margin-top:16px">
+        <div>
+          <h3>Apply with Aether</h3>
+          <p class="sub" style="margin:0">Select a theme, then select <b>Apply with Aether</b>. <a href="https://github.com/omacom/aether">Aether</a> downloads <code>colors.toml</code> and the background from this site. It shows a preview and asks before it applies the theme. <b>Install as Omarchy theme</b> adds the theme to the Omarchy theme picker.</p>
+        </div>
+      </div>
       <p class="sub" style="margin-top:18px">Other options: <code>--list</code>, <code>--update</code>, <code>--remove</code>, <code>--link</code> and <code>--force</code>. Run <code>install.sh --help</code> for details.</p>
     </section>
   </main>
@@ -296,6 +313,15 @@ omarchy theme set synthwave">Copy</button><span class="p">$ </span>git clone --d
       <div>
         <div class="label">ANSI colors · select to copy</div>
         <div class="swatches" id="d-sw"></div>
+      </div>
+      <div>
+        <div class="label">Aether</div>
+        <div class="aether">
+          <a class="a-btn primary" id="a-apply">Apply with Aether</a>
+          <a class="a-btn" id="a-install">Install as Omarchy theme</a>
+          <a class="a-btn" id="a-edit">Open in editor</a>
+        </div>
+        <p class="hint" id="a-hint"></p>
       </div>
       <div>
         <div class="label">Install</div>
@@ -373,8 +399,22 @@ render();
 function imageFor(t) {
   return { shot: `${t.slug}/preview.png`, wordmark: `${t.slug}/backgrounds/0-omarchy-wordmark.jpg`, native: `${t.slug}/backgrounds/1-${t.motif}.jpg` }[view];
 }
+// aether:// links. Aether downloads the files from this site over HTTPS.
+function aetherUrl(t, extra = {}) {
+  const bg = view === 'wordmark' ? '0-omarchy-wordmark.jpg' : `1-${t.motif}.jpg`;
+  const q = new URLSearchParams({ colors: `${SITE}/${t.slug}/colors.toml`, wallpaper: `${SITE}/${t.slug}/backgrounds/${bg}`, ...extra });
+  return `aether://apply?${q}`;
+}
+function updateAether(t) {
+  $('a-apply').href = aetherUrl(t);
+  $('a-install').href = aetherUrl(t, { as_omarchy_theme: t.slug });
+  $('a-edit').href = aetherUrl(t, { edit: 'true' });
+  const bg = view === 'wordmark' ? 'the wordmark background' : 'the native background';
+  $('a-hint').innerHTML = `Uses ${bg}. Needs <a href="https://github.com/omacom/aether">Aether</a>. Aether asks before it changes anything. Install stops if a theme named <code>${t.slug}</code> exists.`;
+}
 function show(v) {
   view = v; const t = T[current];
+  updateAether(t);
   $('d-img').src = imageFor(t);
   $('d-img').alt = { shot: `${t.name} applied to workspace 7`, wordmark: `${t.name} background with the Omarchy wordmark`, native: `${t.name} ${MOTIFS[t.motif]} background` }[v];
   document.querySelectorAll('.tab').forEach(b => b.setAttribute('aria-selected', b.dataset.view === v));
@@ -390,7 +430,7 @@ function open(i) {
     .map(([k, v]) => `<dt>${k}</dt><dd>${v.startsWith('#') ? `<span style="color:${v}">■</span> ${v}` : esc(v)}</dd>`).join('');
   $('d-sw').innerHTML = t.ansi.map((h, k) => `<button class="sw" data-hex="${h}" title="${k > 7 ? 'bright ' : ''}${NAMES[k % 8]} ${h}"><i style="background:${h}"></i><span>${h.slice(1)}</span></button>`).join('');
   const cmd = `curl -fsSL ${SITE}/install.sh | bash -s -- ${t.slug} --set`;
-  $('d-install').innerHTML = `<button class="copy" data-copy="${esc(cmd)}">Copy</button><span class="p">$ </span>curl -fsSL ${SITE}/install.sh \\\n    | bash -s -- ${t.slug} --set`;
+  $('d-install').innerHTML = `<button class="copy" data-copy="${esc(cmd)}">Copy</button><span class="p">$ </span>curl -fsSL \\\n    ${SITE}/install.sh \\\n    | bash -s -- ${t.slug} --set`;
   $('d-files').innerHTML = [
     ['colors.toml', `${t.slug}/colors.toml`], ['preview.png', `${t.slug}/preview.png`],
     ['Folder on GitHub', `${REPO}/tree/main/${t.slug}`],

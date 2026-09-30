@@ -42,7 +42,7 @@ export async function launch() {
     await send('Page.enable');
     await send('Page.navigate', { url });
     for (let i = 0; i < 100 && !(await evaluate('document.readyState === "complete"')); i++) await new Promise(r => setTimeout(r, 100));
-    return { evaluate, close: () => ws.close() };
+    return { evaluate, send, close: () => ws.close() };
   }
 
   // Wait for Chromium to exit, so it does not write to the profile during the removal.

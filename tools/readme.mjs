@@ -165,6 +165,26 @@ omarchy theme set synthwave
 
 The full repo is about ${sizeMb} MB because it has 200 backgrounds at 3840×2160.
 
+### Apply with Aether
+
+[Aether](https://github.com/omacom/aether) can apply a theme straight from the [gallery](${SITE}). Open a theme and select 1 of these buttons:
+
+| Button | Result |
+| --- | --- |
+| Apply with Aether | Aether loads the palette and the background, then applies them through its own theme |
+| Install as Omarchy theme | Aether adds the theme to \`~/.config/omarchy/themes\` and activates it. This stops if a theme with the same name exists. |
+| Open in editor | Aether opens the palette in its editor. Nothing changes until you select Apply. |
+
+Aether shows a preview and asks before it changes anything. The link uses the background that you select in the gallery. The native background is the default.
+
+GitHub does not render \`aether://\` links, so use the gallery or build a link yourself:
+
+\`\`\`text
+aether://apply?colors=${SITE}/synthwave/colors.toml&wallpaper=${SITE}/synthwave/backgrounds/1-sunset-grid.jpg
+\`\`\`
+
+Add \`&as_omarchy_theme=synthwave\` to install the theme, or \`&edit=true\` to open the editor.
+
 ### Options
 
 | Command | Result |
