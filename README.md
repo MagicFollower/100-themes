@@ -7,6 +7,7 @@ This repo has 100 dark themes for [Omarchy](https://omarchy.org). Each theme has
 - Gallery: [bjarneo.github.io/100-themes](https://bjarneo.github.io/100-themes)
 - Promo video: [`assets/promo.mp4`](assets/promo.mp4)
 - Themes: 100 folders at the root of this repo, one folder for each theme.
+- Light versions: [100 day themes](https://github.com/bjarneo/100-themes-day), with the same hues on a light background.
 
 ## Install
 
