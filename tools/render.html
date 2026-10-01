@@ -10,10 +10,13 @@
 <script>
 // Background renderer. tools/render.mjs loads this page in headless Chromium
 // and calls window.renderImage(). All drawing uses a 3840x2160 design space.
+// S scales the design space to the output size. Full-size layers use the
+// output resolution, and blur radii scale with S, so every size looks the same.
 
 const W = 3840, H = 2160;
 const MONO = '"JetBrainsMono Nerd Font", "JetBrains Mono", monospace';
 let LOGO = [];
+let S = 1;
 
 window.setLogo = paths => { LOGO = paths.map(p => ({ path: new Path2D(p.d), rule: p.evenodd ? 'evenodd' : 'nonzero' })); };
 
@@ -38,11 +41,20 @@ function lerp(a, b, t) { return a + (b - a) * t; }
 function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
 function smooth(t) { return t * t * (3 - 2 * t); }
 
-function layer(w = W, h = H) {
+// A layer without a size covers the design space at the output resolution.
+// Draw it back with drawImage(cv, 0, 0, W, H). A layer with a size is a
+// small helper bitmap at that exact pixel size.
+function layer(w, h) {
   const cv = document.createElement('canvas');
-  cv.width = w; cv.height = h;
-  return [cv, cv.getContext('2d')];
+  const full = w === undefined;
+  cv.width = full ? Math.round(W * S) : w; cv.height = full ? Math.round(H * S) : h;
+  const cx = cv.getContext('2d');
+  if (full) cx.setTransform(S, 0, 0, S, 0, 0);
+  return [cv, cx];
 }
+
+// Canvas blur ignores the transform, so the radius scales with S.
+const blur = r => `blur(${(r * S).toFixed(1)}px)`;
 
 // Seeded 2D gradient noise.
 function makeNoise(seed) {
@@ -69,10 +81,10 @@ function bloom(ctx, draw, radii = [90, 28], strength = [.85, .9]) {
   draw(lx);
   ctx.save();
   ctx.globalCompositeOperation = 'lighter';
-  radii.forEach((r, i) => { ctx.filter = `blur(${r}px)`; ctx.globalAlpha = strength[i]; ctx.drawImage(cv, 0, 0); });
+  radii.forEach((r, i) => { ctx.filter = blur(r); ctx.globalAlpha = strength[i]; ctx.drawImage(cv, 0, 0, W, H); });
   ctx.filter = 'none'; ctx.globalAlpha = 1;
   ctx.globalCompositeOperation = 'source-over';
-  ctx.drawImage(cv, 0, 0);
+  ctx.drawImage(cv, 0, 0, W, H);
   ctx.restore();
 }
 
@@ -90,7 +102,9 @@ function grain(ctx, seed, alpha = .05) {
   gx.putImageData(img, 0, 0);
   ctx.save();
   ctx.globalAlpha = alpha; ctx.globalCompositeOperation = 'overlay';
-  ctx.fillStyle = ctx.createPattern(cv, 'repeat'); ctx.fillRect(0, 0, W, H);
+  const pattern = ctx.createPattern(cv, 'repeat');
+  pattern.setTransform(new DOMMatrix().scale(1 / S));
+  ctx.fillStyle = pattern; ctx.fillRect(0, 0, W, H);
   ctx.restore();
 }
 
@@ -163,7 +177,7 @@ function wordmark(ctx, P, r) {
   const mask = rx.createLinearGradient(0, ly + lh + 40, 0, ly + lh + 40 + lh * .8);
   mask.addColorStop(0, 'rgba(0,0,0,.2)'); mask.addColorStop(1, 'rgba(0,0,0,0)');
   rx.globalCompositeOperation = 'destination-in'; rx.fillStyle = mask; rx.fillRect(0, 0, W, H);
-  ctx.save(); ctx.filter = 'blur(4px)'; ctx.drawImage(rcv, 0, 0); ctx.restore();
+  ctx.save(); ctx.filter = blur(4); ctx.drawImage(rcv, 0, 0, W, H); ctx.restore();
 
   bloom(ctx, lx2 => drawLogo(lx2, lx, ly, scale, grad), [120, 36], [.7, .55]);
 
@@ -198,8 +212,8 @@ MOTIFS['sunset-grid'] = (ctx, P, r, noise) => {
   for (let i = 0; i < 9; i++) { const y = scy + 30 + i * i * 7 + i * 34, h = 6 + i * 4.2; sx.fillRect(0, y, W, h); }
   sx.globalCompositeOperation = 'source-over';
   sx.clearRect(0, hz, W, H);
-  ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.filter = 'blur(140px)'; ctx.globalAlpha = .55; ctx.drawImage(scv, 0, 0); ctx.restore();
-  ctx.drawImage(scv, 0, 0);
+  ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.filter = blur(140); ctx.globalAlpha = .55; ctx.drawImage(scv, 0, 0, W, H); ctx.restore();
+  ctx.drawImage(scv, 0, 0, W, H);
 
   // Mountains
   const far = ridge(r, noise, hz, 360, .0011, 3);
@@ -285,8 +299,8 @@ function cloudField(ctx, P, noise, colors, opts = {}) {
   }
   cx.putImageData(img, 0, 0);
   ctx.save(); ctx.imageSmoothingQuality = 'high'; ctx.globalCompositeOperation = 'lighter';
-  ctx.filter = 'blur(18px)'; ctx.drawImage(cv, 0, 0, W, H);
-  ctx.filter = 'blur(3px)'; ctx.globalAlpha = .6; ctx.drawImage(cv, 0, 0, W, H);
+  ctx.filter = blur(18); ctx.drawImage(cv, 0, 0, W, H);
+  ctx.filter = blur(3); ctx.globalAlpha = .6; ctx.drawImage(cv, 0, 0, W, H);
   ctx.restore();
 }
 
@@ -327,14 +341,14 @@ MOTIFS['aurora'] = (ctx, P, r, noise) => {
       ax.fillStyle = g; ax.fillRect(x, y - len, 4, len);
     }
   });
-  ctx.save(); ctx.filter = 'blur(10px)'; ctx.drawImage(acv, 0, 0); ctx.filter = 'blur(60px)'; ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = .6; ctx.drawImage(acv, 0, 0); ctx.restore();
+  ctx.save(); ctx.filter = blur(10); ctx.drawImage(acv, 0, 0, W, H); ctx.filter = blur(60); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = .6; ctx.drawImage(acv, 0, 0, W, H); ctx.restore();
 
   // Water reflection
   ctx.save();
   ctx.beginPath(); ctx.rect(0, hz, W, H - hz); ctx.clip();
   ctx.fillStyle = P.darker; ctx.fillRect(0, hz, W, H - hz);
-  ctx.translate(0, hz * 2); ctx.scale(1, -1); ctx.globalAlpha = .35; ctx.filter = 'blur(14px)';
-  ctx.drawImage(acv, 0, 0);
+  ctx.translate(0, hz * 2); ctx.scale(1, -1); ctx.globalAlpha = .35; ctx.filter = blur(14);
+  ctx.drawImage(acv, 0, 0, W, H);
   ctx.restore();
 
   const far = ridge(r, noise, hz, 260, .0012, 5);
@@ -371,7 +385,7 @@ MOTIFS['skyline'] = (ctx, P, r, noise) => {
       x += bw + 6 + r() * 30;
     }
   });
-  ctx.drawImage(ccv, 0, 0);
+  ctx.drawImage(ccv, 0, 0, W, H);
   bloom(ctx, lx => {
     neon.forEach(n => {
       lx.strokeStyle = n.color; lx.lineWidth = 7;
@@ -383,8 +397,8 @@ MOTIFS['skyline'] = (ctx, P, r, noise) => {
   ctx.save();
   ctx.beginPath(); ctx.rect(0, street, W, H - street); ctx.clip();
   ctx.fillStyle = P.darker; ctx.fillRect(0, street, W, H - street);
-  ctx.translate(0, street * 2); ctx.scale(1, -1); ctx.globalAlpha = .45; ctx.filter = 'blur(10px)';
-  ctx.drawImage(ccv, 0, 0);
+  ctx.translate(0, street * 2); ctx.scale(1, -1); ctx.globalAlpha = .45; ctx.filter = blur(10);
+  ctx.drawImage(ccv, 0, 0, W, H);
   ctx.restore();
   // Rain
   ctx.strokeStyle = rgba(P.c[14], .12); ctx.lineWidth = 1.5;
@@ -418,7 +432,7 @@ MOTIFS['equalizer'] = (ctx, P, r, noise) => {
   bloom(ctx, lx => drawBars(lx, 1), [70, 18], [.8, .7]);
   // Reflection
   const [rcv, rx] = layer(); drawBars(rx, 1);
-  ctx.save(); ctx.translate(0, base * 2 + 20); ctx.scale(1, -1); ctx.globalAlpha = .18; ctx.filter = 'blur(6px)'; ctx.drawImage(rcv, 0, 0); ctx.restore();
+  ctx.save(); ctx.translate(0, base * 2 + 20); ctx.scale(1, -1); ctx.globalAlpha = .18; ctx.filter = blur(6); ctx.drawImage(rcv, 0, 0, W, H); ctx.restore();
   const fade = ctx.createLinearGradient(0, base, 0, base + 700);
   fade.addColorStop(0, rgba(P.darker, 0)); fade.addColorStop(1, rgba(P.darker, 1));
   ctx.fillStyle = fade; ctx.fillRect(0, base + 10, W, H - base);
@@ -476,7 +490,7 @@ MOTIFS['blobs'] = (ctx, P, r) => {
     bx.fillStyle = rgba(P.c[15], .05 + r() * .07); bx.strokeStyle = rgba(P.c[15], .14);
     bx.lineWidth = 3; bx.beginPath(); bx.arc(x, y, rad, 0, Math.PI * 2); bx.fill(); bx.stroke();
   }
-  ctx.save(); ctx.filter = 'blur(3px)'; ctx.drawImage(bcv, 0, 0); ctx.restore();
+  ctx.save(); ctx.filter = blur(3); ctx.drawImage(bcv, 0, 0, W, H); ctx.restore();
   vignette(ctx, P, .45);
   grain(ctx, P.index * 23, .07);
 };
@@ -484,7 +498,7 @@ MOTIFS['blobs'] = (ctx, P, r) => {
 MOTIFS['depths'] = (ctx, P, r, noise) => {
   skyGradient(ctx, [[0, mix(P.bg, P.c[6], .28)], [.35, P.bg], [1, P.darker]]);
   // Light rays
-  ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.filter = 'blur(16px)';
+  ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.filter = blur(16);
   for (let i = 0; i < 18; i++) {
     const x = W * (.05 + r() * .9), w = 30 + r() * 180, sk = 500 + r() * 400;
     const g = ctx.createLinearGradient(0, 0, 0, H * .9);
@@ -582,7 +596,7 @@ MOTIFS['scanlines'] = (ctx, P, r, noise) => {
   }
   // Tracking band
   const ty = H * (.25 + r() * .5);
-  ctx.save(); ctx.filter = 'blur(20px)'; ctx.fillStyle = rgba(P.c[15], .1); ctx.fillRect(0, ty, W, 120); ctx.restore();
+  ctx.save(); ctx.filter = blur(20); ctx.fillStyle = rgba(P.c[15], .1); ctx.fillRect(0, ty, W, 120); ctx.restore();
   for (let i = 0; i < 4000; i++) { ctx.fillStyle = rgba(P.c[15], r() * .5); ctx.fillRect(r() * W, ty + r() * 120, 2 + r() * 14, 2); }
   // OSD
   bloom(ctx, lx => {
@@ -665,7 +679,7 @@ MOTIFS['tubes'] = (ctx, P, r) => {
   const [rcv, rx] = layer(); draw(rx);
   ctx.fillStyle = P.darker; ctx.fillRect(0, floorY, W, H - floorY);
   ctx.save(); ctx.beginPath(); ctx.rect(0, floorY, W, H - floorY); ctx.clip();
-  ctx.translate(0, floorY * 2); ctx.scale(1, -1); ctx.globalAlpha = .3; ctx.filter = 'blur(24px)'; ctx.globalCompositeOperation = 'lighter'; ctx.drawImage(rcv, 0, 0);
+  ctx.translate(0, floorY * 2); ctx.scale(1, -1); ctx.globalAlpha = .3; ctx.filter = blur(24); ctx.globalCompositeOperation = 'lighter'; ctx.drawImage(rcv, 0, 0, W, H);
   ctx.restore();
   const fade = ctx.createLinearGradient(0, floorY, 0, H);
   fade.addColorStop(0, rgba(P.darker, 0)); fade.addColorStop(1, rgba(P.darker, 1));
@@ -702,12 +716,12 @@ MOTIFS['planet'] = (ctx, P, r, noise) => {
       pc.fillStyle = mix(mix(P.c[1], P.c[3], clamp(v + .5, 0, 1)), P.darker, clamp(-v, 0, .6));
       pc.fillRect(px - pr, y, pr * 2, 4);
     }
-    pc.filter = 'blur(6px)'; pc.drawImage(pcv, 0, 0); pc.filter = 'none';
+    pc.filter = blur(6); pc.drawImage(pcv, 0, 0, W, H); pc.filter = 'none';
     const shade = pc.createRadialGradient(px - pr * .45, py - pr * .45, pr * .1, px, py, pr * 1.05);
     shade.addColorStop(0, 'rgba(0,0,0,0)'); shade.addColorStop(.7, 'rgba(0,0,0,.45)'); shade.addColorStop(1, 'rgba(0,0,0,.92)');
     pc.fillStyle = shade; pc.fillRect(0, 0, W, H);
     pc.restore();
-    ctx.drawImage(pcv, 0, 0);
+    ctx.drawImage(pcv, 0, 0, W, H);
     bloom(ctx, lx => { lx.strokeStyle = rgba(P.c[14], .9); lx.lineWidth = 6; lx.beginPath(); lx.arc(px, py, pr, Math.PI * .95, Math.PI * 1.65); lx.stroke(); }, [40, 12], [.9, .7]);
   }
   vignette(ctx, P, .5);
@@ -721,7 +735,8 @@ window.renderImage = async (theme, kind, width, height, mime = 'image/png', qual
   const cv = document.getElementById('c');
   cv.width = width; cv.height = height;
   const ctx = cv.getContext('2d');
-  ctx.setTransform(width / W, 0, 0, height / H, 0, 0);
+  S = width / W;
+  ctx.setTransform(S, 0, 0, S, 0, 0);
   const P = { ...theme, bg: theme.colors.background, fg: theme.colors.foreground, darker: theme.colors.darker_background, accent: theme.colors.accent, c: theme.ansi };
   const r = rng(theme.index * 104729 + (kind === 'wordmark' ? 1 : 2));
   const noise = makeNoise(theme.index * 7907 + 3);
