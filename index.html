@@ -129,6 +129,8 @@ h2 { margin: 0 0 6px; font-size: clamp(22px, 2.6vw, 30px); letter-spacing: -.01e
 }
 .card:hover, .card:focus-visible { border-color: var(--card-accent); box-shadow: 0 0 0 1px var(--card-accent), 0 8px 32px -8px var(--card-glow); transform: translateY(-2px); outline: none; }
 .card img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: cover; background: var(--card-bg); }
+.card img { opacity: 0; transition: opacity .25s; }
+.card img.loaded { opacity: 1; }
 .card .meta { display: flex; align-items: baseline; gap: 10px; padding: 12px 14px 8px; min-width: 0; }
 .card .num { color: var(--card-dim); font-size: 12px; flex-shrink: 0; }
 .card .name { color: var(--card-fg); font-weight: 700; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -203,7 +205,7 @@ footer p { margin: 0 0 6px; max-width: 80ch; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .card, .toast { transition: none; }
+  .card, .card img, .toast { transition: none; }
   .card:hover { transform: none; }
 }
 
@@ -385,7 +387,7 @@ $('q').addEventListener('input', render);
 
 // Cards
 $('grid').innerHTML = T.map((t, i) => `<button class="card" data-i="${i}">
-    <img alt="" width="640" height="400" loading="lazy" decoding="async">
+    <img alt="" width="640" height="400" decoding="async">
     <span class="meta"><span class="num">${pad(t.index)}</span><span class="name">${esc(t.name)}</span><span class="dots">${VARIANTS.map(v => `<i title="${esc(v.label)}" style="background:${t.variants[v.key].colors.background}"></i>`).join('')}</span></span>
     <span class="strip"></span>
   </button>`).join('');
@@ -396,6 +398,17 @@ function fallback(img, src) {
   img.onerror = () => { img.onerror = null; img.src = src; };
 }
 
+// Lazy loading: a card gets its thumbnail when it comes within 300 px of the
+// viewport. Native lazy loading starts much earlier and loads rows at once.
+const thumbs = new IntersectionObserver(entries => {
+  for (const e of entries) {
+    if (!e.isIntersecting) continue;
+    e.target.dataset.seen = '1';
+    e.target.src = e.target.dataset.src;
+    thumbs.unobserve(e.target);
+  }
+}, { rootMargin: '300px 0px' });
+
 function paintCards() {
   $('grid').querySelectorAll('.card').forEach(el => {
     const t = T[+el.dataset.i], v = t.variants[variant], c = v.colors;
@@ -403,7 +416,11 @@ function paintCards() {
       .forEach(([k, val]) => el.style.setProperty(k, val));
     const img = el.querySelector('img');
     fallback(img, `assets/bg/${t.slug}/${variant}/1-${t.motif}.webp`);
-    img.src = `assets/thumbs/${t.slug}/${variant}.webp`;
+    img.onload = () => img.classList.add('loaded');
+    img.dataset.src = `assets/thumbs/${t.slug}/${variant}.webp`;
+    // A card that is already on screen swaps at once. The others wait.
+    if (img.dataset.seen) img.src = img.dataset.src;
+    else thumbs.observe(img);
     img.alt = `${v.name} applied to workspace 7`;
     el.querySelector('.strip').innerHTML = v.ansi.map(h => `<i style="background:${h}"></i>`).join('');
   });
