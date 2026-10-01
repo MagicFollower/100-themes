@@ -385,7 +385,7 @@ $('q').addEventListener('input', render);
 
 // Cards
 $('grid').innerHTML = T.map((t, i) => `<button class="card" data-i="${i}">
-    <img alt="" width="1440" height="900" loading="lazy" decoding="async">
+    <img alt="" width="640" height="400" loading="lazy" decoding="async">
     <span class="meta"><span class="num">${pad(t.index)}</span><span class="name">${esc(t.name)}</span><span class="dots">${VARIANTS.map(v => `<i title="${esc(v.label)}" style="background:${t.variants[v.key].colors.background}"></i>`).join('')}</span></span>
     <span class="strip"></span>
   </button>`).join('');
@@ -403,7 +403,7 @@ function paintCards() {
       .forEach(([k, val]) => el.style.setProperty(k, val));
     const img = el.querySelector('img');
     fallback(img, `assets/bg/${t.slug}/${variant}/1-${t.motif}.webp`);
-    img.src = `assets/shots/${t.slug}/${variant}.webp`;
+    img.src = `assets/thumbs/${t.slug}/${variant}.webp`;
     img.alt = `${v.name} applied to workspace 7`;
     el.querySelector('.strip').innerHTML = v.ansi.map(h => `<i style="background:${h}"></i>`).join('');
   });

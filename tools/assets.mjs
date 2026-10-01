@@ -3,6 +3,7 @@
 //   assets/aether/<theme>/<variant>/*.jpg   3840x2160 copies for Aether links
 //   assets/bg/<theme>/<variant>/*.webp      1440x810 previews for the gallery
 //   assets/shots/<theme>/variants.webp      the 5 variant screenshots in a row
+//   assets/thumbs/<theme>/<variant>.webp    640x400 screenshots for the gallery cards
 //   assets/mosaic.jpg                       all 500 screenshots in one image
 //
 //   node tools/assets.mjs
@@ -41,6 +42,11 @@ for (const t of themes) {
       if (!fresh(aether, [join(src, f)])) jobs.push(['magick', [join(src, f), '-resize', '3840x2160', '-sampling-factor', '4:2:0', '-quality', '82', '-interlace', 'Plane', '-strip', aether]]);
       if (!fresh(thumb, [join(src, f)])) jobs.push(['magick', [join(src, f), '-resize', '1440x810', '-quality', '80', '-strip', thumb]]);
     }
+  }
+  for (const { key } of VARIANTS) {
+    const src = shotOrBackground(t, key);
+    const thumb = join(ROOT, 'assets', 'thumbs', t.slug, `${key}.webp`);
+    if (existsSync(src) && !fresh(thumb, [src])) jobs.push(['magick', [src, '-resize', '640x400^', '-gravity', 'center', '-extent', '640x400', '-quality', '78', '-strip', thumb]]);
   }
   const shots = VARIANTS.map(({ key }) => shotOrBackground(t, key));
   const strip = join(ROOT, 'assets', 'shots', t.slug, 'variants.webp');

@@ -49,7 +49,7 @@ cd ~/.local/share/100-themes
 omarchy theme set synthwave-oled
 ```
 
-The full repo is about 1560 MB because it has 1000 backgrounds at 6K. To download less, use the `curl` command above. It downloads only the folders that you name.
+The full repo is about 1610 MB because it has 1000 backgrounds at 6K. To download less, use the `curl` command above. It downloads only the folders that you name.
 
 ### Options
 
@@ -189,7 +189,7 @@ The `tools/` folder has every script that made this repo. You need Node.js 22 or
 | `node tools/build.mjs` | Writes `colors.toml`, `icons.theme` and `assets/themes.js` |
 | `node tools/render.mjs [theme...]` | Renders the backgrounds at 6144×3456 with headless Chromium. Set `VARIANTS=oled` to render some variants, or `SIZE=3840x2160` for another size. |
 | `tools/capture.sh [--variant list] [theme...]` | Applies each variant, takes a screenshot of workspace 7, and writes `preview.png` |
-| `node tools/assets.mjs` | Writes the Aether copies, the gallery previews, the variant strips and the mosaic |
+| `node tools/assets.mjs` | Writes the Aether copies, the gallery thumbnails and previews, the variant strips and the mosaic |
 | `node tools/promo.mjs <song.mp3>` | Renders `assets/promo.mp4`, every theme once, 20 from each variant, one per beat |
 | `node tools/readme.mjs` | Writes this README |
 
