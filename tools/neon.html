@@ -9,7 +9,9 @@
 <canvas id="c" width="3840" height="2160"></canvas>
 <script>
 // Neon sign stills for the animated wallpapers. tools/neon.mjs calls
-// setLogo() once and renderNeon() for each state of each theme:
+// setLogo() once and renderNeon() for each state of each theme variant.
+// Light variants get a light wall, a colored haze and drop shadows, because
+// additive glow turns white on a light background. The states:
 //   on    the sign is lit
 //   off   the tubes are dark glass
 //   half  the sign is lit at half strength
@@ -48,7 +50,8 @@ function tubes(c, P, { lit, skip = -1, core = 1 }) {
   grad.addColorStop(0, P.c[6]); grad.addColorStop(.5, mix(P.c[6], P.c[5], .5)); grad.addColorStop(1, P.c[5]);
   // Unlit glass: the same gradient, darkened
   const glass = c.createLinearGradient(0, 0, 1215, 0);
-  glass.addColorStop(0, mix(P.c[6], '#000000', .72)); glass.addColorStop(1, mix(P.c[5], '#000000', .72));
+  const tint = P.light ? '#ffffff' : '#000000', amount = P.light ? .55 : .72;
+  glass.addColorStop(0, mix(P.c[6], tint, amount)); glass.addColorStop(1, mix(P.c[5], tint, amount));
   LOGO.forEach((p, i) => {
     const on = lit && i !== skip;
     if (on) {
@@ -57,16 +60,16 @@ function tubes(c, P, { lit, skip = -1, core = 1 }) {
     } else {
       // Unlit glass with a faint highlight
       c.strokeStyle = glass; c.lineWidth = 9; c.stroke(p.path);
-      c.strokeStyle = 'rgba(255,255,255,.07)'; c.lineWidth = 2; c.stroke(p.path);
+      c.strokeStyle = P.light ? 'rgba(255,255,255,.6)' : 'rgba(255,255,255,.07)'; c.lineWidth = 2; c.stroke(p.path);
     }
   });
   c.restore();
 }
 
 function wall(P, r) {
-  const base = mix(P.bg, '#000000', .35);
-  ctx.fillStyle = base; ctx.fillRect(0, 0, W, H);
-  // Bricks with dark mortar
+  const base = P.light ? mix(P.bg, '#000000', .06) : mix(P.bg, '#000000', .35);
+  ctx.fillStyle = P.light ? mix(base, '#000000', .1) : base; ctx.fillRect(0, 0, W, H);
+  // Bricks with darker mortar
   const bh = 78, bw = 236;
   for (let y = 0, row = 0; y < H; y += bh, row++) {
     for (let x = (row % 2) * -bw / 2; x < W; x += bw) {
@@ -82,13 +85,39 @@ function wall(P, r) {
   }
 }
 
+// Light variants: a colored haze instead of additive glow, and a drop shadow
+// that shows the tubes stand off the wall.
+function lightSign(P, strength, skip) {
+  const [sc, sx] = layer();
+  tubes(sx, P, { lit: false });
+  sx.globalCompositeOperation = 'source-in'; sx.fillStyle = 'rgba(0,0,0,1)'; sx.fillRect(0, 0, W, H);
+  ctx.save(); ctx.filter = 'blur(10px)'; ctx.globalAlpha = .28; ctx.drawImage(sc, 16, 22); ctx.restore();
+  if (strength > 0) {
+    const [lc, lx] = layer();
+    tubes(lx, P, { lit: true, skip });
+    ctx.save();
+    ctx.filter = 'blur(120px)'; ctx.globalAlpha = .45 * strength; ctx.drawImage(lc, 0, 0);
+    ctx.filter = 'blur(30px)'; ctx.globalAlpha = .55 * strength; ctx.drawImage(lc, 0, 0);
+    ctx.restore();
+  }
+  if (skip >= 0 || strength === 0) tubes(ctx, P, { lit: false });
+  if (strength > 0) tubes(ctx, P, { lit: true, skip, core: strength });
+  const v = ctx.createRadialGradient(W / 2, H / 2, H * .4, W / 2, H / 2, W * .64);
+  v.addColorStop(0, rgba(P.c[8], 0)); v.addColorStop(1, rgba(P.c[8], .3));
+  ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
+}
+
 window.renderNeon = async (theme, state) => {
-  const P = { bg: theme.colors.background, accent: theme.colors.accent, c: theme.ansi };
+  const P = { bg: theme.colors.background, accent: theme.colors.accent, c: theme.ansi, light: theme.colors.mode === 'light' };
   const r = rng(theme.index * 7919 + 11);
   wall(P, r);
 
   const strength = { on: 1, part: 1, half: .45, off: 0 }[state];
   const skip = state === 'part' ? 4 : -1;
+  if (P.light) {
+    lightSign(P, strength, skip);
+    return cv.toDataURL('image/png');
+  }
 
   if (strength > 0) {
     // Light that the sign throws on the wall

@@ -251,7 +251,7 @@ synthwave/
 │   └── backgrounds/
 │       ├── 0-omarchy-wordmark.jpg # the Omarchy wordmark in the variant colors, 6K
 │       ├── 1-sunset-grid.jpg      # the native background for the variant colors, 6K
-│       └── 2-neon-sign.mp4        # dark only: the wordmark as a blinking neon sign, 4K
+│       └── 2-neon-sign.mp4        # the wordmark as a blinking neon sign, 4K
 ├── day/                           # installs as synthwave-day
 ├── high-contrast/                 # installs as synthwave-high-contrast
 ├── day-high-contrast/             # installs as synthwave-day-high-contrast
@@ -300,7 +300,7 @@ Colors outside sRGB lose chroma until they fit.
 
 Each variant has 2 backgrounds at 6K, 6144×3456. The important content stays near the center, so the images also fill 16:10 and 21:9 screens. The dark variants use night scenes. The light variants use day scenes of the same motif.
 
-The dark variant also has an animated background, \`2-neon-sign.mp4\`. It shows the Omarchy wordmark as a neon sign on a brick wall, in the colors of the theme. The sign flickers on, stays lit for about 7 seconds, has a short glitch, and blinks off again. The video is 3840×2160 and a 20 second loop of about 2.4 MB. To show it, run \`omarchy theme bg next\` twice after you apply a dark theme.
+Every variant also has an animated background, \`2-neon-sign.mp4\`. It shows the Omarchy wordmark as a neon sign on a brick wall, in the colors of the variant. The light variants use a light wall. The sign flickers on, stays lit for about 7 seconds, has a short glitch, and blinks off again. Each video is 3840×2160, a 20 second loop of 0.7 to 2.6 MB. To show it, run \`omarchy theme bg next\` twice after you apply a theme.
 
 | Motif | Themes |
 | --- | --- |
@@ -315,7 +315,7 @@ The \`tools/\` folder has every script that made this repo. You need Node.js 22 
 | \`node tools/build.mjs\` | Writes \`colors.toml\`, \`icons.theme\` and \`assets/themes.js\` |
 | \`node tools/render.mjs [theme...]\` | Renders the backgrounds at 6144×3456 with headless Chromium. Set \`VARIANTS=oled\` to render some variants, or \`SIZE=3840x2160\` for another size. |
 | \`tools/capture.sh [--variant list] [theme...]\` | Applies each variant, takes a screenshot of workspace 7, and writes \`preview.png\` |
-| \`node tools/neon.mjs [theme...]\` | Renders \`2-neon-sign.mp4\` for the dark variants. It draws 4 stills per theme and builds the video from a frame timeline. |
+| \`node tools/neon.mjs [theme...]\` | Renders \`2-neon-sign.mp4\` for every variant. Set \`VARIANTS=day\` for some variants. It draws 4 stills per video and builds the video from a frame timeline. |
 | \`node tools/assets.mjs\` | Writes the Aether copies, the gallery thumbnails and previews, the variant strips and the mosaic |
 | \`node tools/promo.mjs <song.mp3>\` | Renders \`assets/promo.mp4\`, every theme once, 20 from each variant, one per beat |
 | \`node tools/readme.mjs\` | Writes this README |

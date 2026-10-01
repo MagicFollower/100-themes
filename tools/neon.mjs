@@ -1,19 +1,21 @@
-// Renders an animated neon sign wallpaper for the dark variant of each theme:
-// <theme>/dark/backgrounds/2-neon-sign.mp4, 3840x2160, a 20 second loop.
+// Renders an animated neon sign wallpaper for each theme variant:
+// <theme>/<variant>/backgrounds/2-neon-sign.mp4, 3840x2160, a 20 second loop.
 //
-//   node tools/neon.mjs                  render all themes
-//   node tools/neon.mjs synthwave hacker render the named themes
+//   node tools/neon.mjs                          render all themes and variants
+//   node tools/neon.mjs synthwave hacker         render the named themes
+//   VARIANTS=day,oled node tools/neon.mjs        render only these variants
+//   SKIP_EXISTING=1 node tools/neon.mjs          keep videos that exist
 //
 // The page draws 4 stills per theme (on, off, half, part). ffmpeg builds the
 // video from a frame timeline, so only 4 frames per theme are drawn.
 // Needs `chromium` and `ffmpeg`.
 
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, readFileSync, writeFileSync, rmSync, mkdtempSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync, rmSync, mkdtempSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { themes } from './palettes.mjs';
+import { themes, VARIANTS } from './palettes.mjs';
 import { launch, logoPaths } from './cdp.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -34,7 +36,15 @@ const TIMELINE = [
 ];
 
 const wanted = process.argv.slice(2);
-const list = wanted.length ? themes.filter(t => wanted.includes(t.slug)) : themes;
+const ONLY = process.env.VARIANTS ? process.env.VARIANTS.split(',') : VARIANTS.map(v => v.key);
+const jobs = [];
+for (const t of wanted.length ? themes.filter(x => wanted.includes(x.slug)) : themes) {
+  for (const { key } of VARIANTS.filter(v => ONLY.includes(v.key))) {
+    const out = join(ROOT, t.slug, key, 'backgrounds', '2-neon-sign.mp4');
+    if (process.env.SKIP_EXISTING && existsSync(out)) continue;
+    jobs.push({ t, key, out });
+  }
+}
 const logo = logoPaths(readFileSync('/usr/share/omarchy/logo.svg', 'utf8'));
 const scratch = mkdtempSync(join(tmpdir(), 'theme-neon-'));
 const browser = await launch();
@@ -43,10 +53,10 @@ await page.evaluate(`setLogo(${JSON.stringify(logo)})`);
 
 const started = Date.now();
 let done = 0;
-for (const t of list) {
-  const v = t.variants.dark;
+for (const { t, key, out } of jobs) {
+  const v = t.variants[key];
   const theme = { index: t.index, colors: v.colors, ansi: v.ansi };
-  const dir = join(scratch, t.slug);
+  const dir = join(scratch, `${t.slug}-${key}`);
   mkdirSync(dir, { recursive: true });
   for (const state of ['on', 'off', 'half', 'part']) {
     const url = await page.evaluate(`renderNeon(${JSON.stringify(theme)}, '${state}')`);
@@ -59,15 +69,14 @@ for (const t of list) {
   const total = TIMELINE.reduce((a, [, n]) => a + n, 0);
   writeFileSync(join(dir, 'list.txt'), lines.join('\n') + '\n');
 
-  const out = join(ROOT, t.slug, 'dark', 'backgrounds', '2-neon-sign.mp4');
   execFileSync('ffmpeg', [
     '-v', 'error', '-y', '-f', 'concat', '-safe', '0', '-i', join(dir, 'list.txt'),
-    '-vf', `fps=${FPS},format=yuv420p`, '-frames:v', String(total), '-c:v', 'libx264', '-preset', 'medium', '-crf', '23',
+    '-vf', `fps=${FPS},format=yuv420p`, '-frames:v', String(total), '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '26',
     '-tune', 'stillimage', '-g', '600', '-an', '-movflags', '+faststart', out,
   ]);
   rmSync(dir, { recursive: true, force: true });
   done++;
-  process.stdout.write(`\r${done}/${list.length} videos, ${((Date.now() - started) / 1000).toFixed(0)}s   `);
+  process.stdout.write(`\r${done}/${jobs.length} videos, ${((Date.now() - started) / 1000).toFixed(0)}s   `);
 }
 process.stdout.write('\n');
 page.close();
