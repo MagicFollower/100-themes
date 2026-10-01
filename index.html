@@ -120,12 +120,6 @@ h2 { margin: 0 0 6px; font-size: clamp(22px, 2.6vw, 30px); letter-spacing: -.01e
   background: var(--surface); border: 1px solid var(--line-2); color: var(--text); font: inherit; font-size: 14px;
 }
 .search::placeholder { color: var(--muted); }
-.chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.chip {
-  cursor: pointer; padding: 7px 11px; border-radius: 999px; font-size: 12px;
-  background: transparent; border: 1px solid var(--line-2); color: var(--text-2);
-}
-.chip[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
 .count { color: var(--muted); font-size: 12px; margin-left: auto; }
 .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); }
 .card {
@@ -267,7 +261,6 @@ footer p { margin: 0 0 6px; max-width: 80ch; }
       <div class="toolbar">
         <div class="seg" id="vseg" role="group" aria-label="Variant"></div>
         <input class="search" id="q" type="search" placeholder="Search by name" aria-label="Search themes by name" autocomplete="off">
-        <div class="chips" id="chips" role="group" aria-label="Filter by background motif"></div>
         <span class="count" id="count" aria-live="polite"></span>
       </div>
       <div class="grid" id="grid"></div>
@@ -367,7 +360,7 @@ const { variants: VARIANTS, themes: T } = window.THEMES;
 const $ = id => document.getElementById(id);
 const pad = n => String(n).padStart(3, '0');
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-let motif = 'all', variant = 'dark', current = -1, view = 'shot';
+let variant = 'dark', current = -1, view = 'shot';
 try { const v = localStorage.getItem('variant'); if (VARIANTS.some(x => x.key === v)) variant = v; } catch {}
 
 function toast(msg, ms = 1200) {
@@ -388,15 +381,6 @@ $('vseg').addEventListener('click', e => {
   paintCards();
 });
 
-// Filter chips
-$('chips').innerHTML = [['all', 'All'], ...Object.entries(MOTIFS)].map(([k, v]) =>
-  `<button class="chip" data-motif="${k}" aria-pressed="${k === 'all'}">${esc(v)}</button>`).join('');
-$('chips').addEventListener('click', e => {
-  const b = e.target.closest('.chip'); if (!b) return;
-  motif = b.dataset.motif;
-  $('chips').querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', c === b));
-  render();
-});
 $('q').addEventListener('input', render);
 
 // Cards
@@ -430,7 +414,7 @@ function render() {
   let shown = 0;
   $('grid').querySelectorAll('.card').forEach(el => {
     const t = T[+el.dataset.i];
-    const ok = (motif === 'all' || t.motif === motif) && (!q || t.name.toLowerCase().includes(q) || t.slug.includes(q));
+    const ok = !q || t.name.toLowerCase().includes(q) || t.slug.includes(q);
     el.hidden = !ok; if (ok) shown++;
   });
   $('count').textContent = `${shown} of ${T.length} themes · ${shown * VARIANTS.length} with variants`;
