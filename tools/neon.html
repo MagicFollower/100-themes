@@ -1,0 +1,118 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Neon sign renderer</title>
+<style>html,body{margin:0;background:#000}canvas{display:block}</style>
+</head>
+<body>
+<canvas id="c" width="3840" height="2160"></canvas>
+<script>
+// Neon sign stills for the animated wallpapers. tools/neon.mjs calls
+// setLogo() once and renderNeon() for each state of each theme:
+//   on    the sign is lit
+//   off   the tubes are dark glass
+//   half  the sign is lit at half strength
+//   part  the sign is lit, but 1 letter is off
+
+const W = 3840, H = 2160;
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+let LOGO = [];
+
+window.setLogo = paths => { LOGO = paths.map(p => ({ path: new Path2D(p.d), rule: p.evenodd ? 'evenodd' : 'nonzero' })); };
+
+function rgb(hex) { return [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16)); }
+function rgba(hex, a) { const [r, g, b] = rgb(hex); return `rgba(${r},${g},${b},${a})`; }
+function mix(a, b, t) {
+  const pa = rgb(a), pb = rgb(b);
+  return '#' + pa.map((v, i) => Math.round(v * (1 - t) + pb[i] * t).toString(16).padStart(2, '0')).join('');
+}
+function layer() { const c = document.createElement('canvas'); c.width = W; c.height = H; return [c, c.getContext('2d')]; }
+function rng(seed) {
+  return () => {
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+// The sign sits in the middle of the wall.
+const SCALE = 2300 / 1215, LX = (W - 1215 * SCALE) / 2, LY = H * .46 - 285 * SCALE / 2;
+
+function tubes(c, P, { lit, skip = -1, core = 1 }) {
+  c.save();
+  c.translate(LX, LY); c.scale(SCALE, SCALE);
+  c.lineJoin = 'round'; c.lineCap = 'round';
+  const grad = c.createLinearGradient(0, 0, 1215, 0);
+  grad.addColorStop(0, P.c[6]); grad.addColorStop(.5, mix(P.c[6], P.c[5], .5)); grad.addColorStop(1, P.c[5]);
+  // Unlit glass: the same gradient, darkened
+  const glass = c.createLinearGradient(0, 0, 1215, 0);
+  glass.addColorStop(0, mix(P.c[6], '#000000', .72)); glass.addColorStop(1, mix(P.c[5], '#000000', .72));
+  LOGO.forEach((p, i) => {
+    const on = lit && i !== skip;
+    if (on) {
+      c.strokeStyle = grad; c.lineWidth = 9; c.stroke(p.path);
+      c.strokeStyle = `rgba(255,255,255,${.85 * core})`; c.lineWidth = 2.6; c.stroke(p.path);
+    } else {
+      // Unlit glass with a faint highlight
+      c.strokeStyle = glass; c.lineWidth = 9; c.stroke(p.path);
+      c.strokeStyle = 'rgba(255,255,255,.07)'; c.lineWidth = 2; c.stroke(p.path);
+    }
+  });
+  c.restore();
+}
+
+function wall(P, r) {
+  const base = mix(P.bg, '#000000', .35);
+  ctx.fillStyle = base; ctx.fillRect(0, 0, W, H);
+  // Bricks with dark mortar
+  const bh = 78, bw = 236;
+  for (let y = 0, row = 0; y < H; y += bh, row++) {
+    for (let x = (row % 2) * -bw / 2; x < W; x += bw) {
+      const shade = (r() - .5) * .08;
+      ctx.fillStyle = mix(base, shade > 0 ? '#ffffff' : '#000000', Math.abs(shade) + .02);
+      ctx.fillRect(x + 4, y + 4, bw - 8, bh - 8);
+    }
+  }
+  // Fine grain on the bricks
+  for (let i = 0; i < 9000; i++) {
+    ctx.fillStyle = `rgba(${r() < .5 ? '255,255,255' : '0,0,0'},${.02 + r() * .03})`;
+    ctx.fillRect(r() * W, r() * H, 3, 3);
+  }
+}
+
+window.renderNeon = async (theme, state) => {
+  const P = { bg: theme.colors.background, accent: theme.colors.accent, c: theme.ansi };
+  const r = rng(theme.index * 7919 + 11);
+  wall(P, r);
+
+  const strength = { on: 1, part: 1, half: .45, off: 0 }[state];
+  const skip = state === 'part' ? 4 : -1;
+
+  if (strength > 0) {
+    // Light that the sign throws on the wall
+    const [lc, lx] = layer();
+    tubes(lx, P, { lit: true, skip });
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    ctx.filter = 'blur(260px)'; ctx.globalAlpha = .55 * strength; ctx.drawImage(lc, 0, 0);
+    ctx.filter = 'blur(90px)'; ctx.globalAlpha = .75 * strength; ctx.drawImage(lc, 0, 0);
+    ctx.filter = 'blur(26px)'; ctx.globalAlpha = .9 * strength; ctx.drawImage(lc, 0, 0);
+    ctx.restore();
+    const halo = ctx.createRadialGradient(W / 2, H * .46, 0, W / 2, H * .46, W * .55);
+    halo.addColorStop(0, rgba(P.accent, .16 * strength)); halo.addColorStop(1, rgba(P.accent, 0));
+    ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = halo; ctx.fillRect(0, 0, W, H); ctx.restore();
+  }
+  // Unlit letters stay visible as dark glass on top of the glow
+  if (skip >= 0 || strength === 0) tubes(ctx, P, { lit: false });
+  if (strength > 0) tubes(ctx, P, { lit: true, skip, core: strength });
+
+  // Vignette
+  const v = ctx.createRadialGradient(W / 2, H / 2, H * .35, W / 2, H / 2, W * .62);
+  v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,.6)');
+  ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
+  return cv.toDataURL('image/png');
+};
+</script>
+</body>
+</html>
