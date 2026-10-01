@@ -1,6 +1,8 @@
-// Palette source for all themes. The generator is ported from the
-// "Neon ANSI Palette" design. Do not change the table or the math unless
-// you want every theme to change.
+// Palette source for all themes and variants. The table and the dark
+// generator are ported from the "Neon ANSI Palette" design. The day, high
+// contrast and OLED variants reuse the hues, chroma and lightness set of
+// each design palette. Do not change the table or the math unless you want
+// every theme to change.
 
 const ORIGINAL = ['#12121C','#FF2E63','#2BFF88','#FFE600','#3D7BFF','#FF2BD6','#00F0FF','#C8C8D8','#4F4F70','#FF6B8F','#7DFFB0','#FFF27A','#7AA8FF','#FF7AE6','#7AF7FF','#FFFFFF'];
 const LM = { n: [.66,.82,.93,.62,.7,.84], p: [.78,.84,.9,.76,.8,.86], m: [.55,.78,.92,.62,.7,.86], s: [.72,.8,.86,.72,.75,.8] };
@@ -172,8 +174,8 @@ const rows = TABLE.split('\n').map(line => {
   return { n, bg: [+bl, +bc, +bh], h: h.split(',').map(Number), c: +c, L: LM[L], set: L };
 });
 
-// The 16 ANSI colors, background, and foreground, as the design builds them.
-const designPalettes = rows.map((g, gi) => {
+// Dark: the 16 ANSI colors, background, and foreground, as the design builds them.
+const darkPalettes = rows.map((g, gi) => {
   if (g.n === 'Neon Wave') return { name: 'Neon Wave', bg: '#0A0A12', fg: '#E6E6F0', c: ORIGINAL };
   const r = rng(gi * 7919 + 13), bh = g.bg[2], bl = g.bg[0], bc = g.bg[1], bf = .55 + r() * .3;
   const hs = g.h.map(h => h + (r() - .5) * 8);
@@ -211,7 +213,36 @@ function orangeFor(red, yellow) {
   return oklchHex((a.L + b.L) / 2, (a.C + b.C) / 2, a.h + dh / 2).toLowerCase();
 }
 
-// The native background motif for each theme. tools/render.html draws them.
+// WCAG contrast ratio of two hex colors.
+export function contrast(a, b) {
+  const lum = hex => {
+    const [r, g, bl] = [1, 3, 5].map(i => {
+      const v = parseInt(hex.slice(i, i + 2), 16) / 255;
+      return v <= .04045 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4;
+    });
+    return .2126 * r + .7152 * g + .0722 * bl;
+  };
+  const x = lum(a), y = lum(b);
+  return (Math.max(x, y) + .05) / (Math.min(x, y) + .05);
+}
+
+// The first color at or above lightness L that reaches the target contrast.
+function lighten(L, C, h, bg, target) {
+  let hex = oklchHex(L, C, h);
+  while (contrast(hex, bg) < target && L < 1) { L = Math.min(1, L + .005); hex = oklchHex(L, C, h); }
+  return hex;
+}
+
+const clampL = (L, lo, hi) => Math.min(hi, Math.max(lo, L));
+
+// The first color at or below lightness L that reaches the target contrast.
+function darken(L, C, h, bg, target) {
+  let hex = oklchHex(L, C, h);
+  while (contrast(hex, bg) < target && L > 0) { L = Math.max(0, L - .005); hex = oklchHex(L, C, h); }
+  return hex;
+}
+
+// The native background motif for each theme. tools/render-*.html draw them.
 const MOTIFS = {
   'sunset-grid': ['Synthwave', 'Neon Wave', 'Vaporwave', 'Outrun', 'Retrowave', 'Dusk', 'Miami Night', 'Racing'],
   'code-rain': ['Hacker', 'Stealth', 'Mainframe', 'Terminal Green', 'Terminal Blue'],
@@ -231,43 +262,168 @@ const MOTIFS = {
 };
 const motifFor = name => Object.keys(MOTIFS).find(m => MOTIFS[m].includes(name));
 
-const lower = x => x.toLowerCase();
+// Day: OKLCH lightness of red, green, yellow, blue, magenta and cyan on a light
+// background, for each lightness set of the design.
+const LIGHT = { n: [.55, .56, .64, .5, .55, .56], p: [.58, .6, .66, .55, .58, .6], m: [.5, .55, .63, .5, .53, .56], s: [.56, .57, .64, .53, .56, .57] };
 
-export const themes = designPalettes.map((p, i) => {
-  const c = p.c.map(lower);
-  const bg = lower(p.bg), fg = lower(p.fg);
-  const accent = c[5];
-  const orange = orangeFor(c[1], c[3]);
+const dayPalettes = rows.map((g, gi) => {
+  const r = rng(gi * 7919 + 13), bh = g.bg[2], bc = g.bg[1];
+  r();
+  const hs = g.h.map(h => h + (r() - .5) * 8);
+  const L = LIGHT[g.set];
+  const tint = Math.min(bc * .45, .022);
+  const bgL = g.set === 'p' || g.set === 's' ? .965 : .975;
+  const normal = hs.map((h, k) => oklchHex(L[k], g.c, h));
+  const bright = hs.map((h, k) => oklchHex(L[k] - .07, g.c * 1.05, h));
   return {
-    index: i + 1,
-    name: p.name,
-    slug: slugify(p.name),
-    motif: motifFor(p.name),
-    row: rows[i],
-    ansi: c,
-    icons: iconTheme(accent),
-    colors: {
-      mode: 'dark',
-      accent,
-      selection: mix(bg, accent, .28),
-      muted: c[8],
-      background: bg,
-      dark_background: mix(bg, '#000000', .25),
-      darker_background: mix(bg, '#000000', .5),
-      lighter_background: c[0],
-      foreground: fg,
-      dark_foreground: mix(fg, bg, .35),
-      light_foreground: c[7],
-      bright_foreground: c[15],
-      red: c[1], yellow: c[3], orange, green: c[2], cyan: c[6], blue: c[4], magenta: c[5],
-      brown: mix(orange, '#000000', .5),
-      bright_red: c[9], bright_yellow: c[11], bright_green: c[10], bright_cyan: c[14], bright_blue: c[12], bright_magenta: c[13],
-    },
+    bgL, tint, bh,
+    bg: oklchHex(bgL, tint, bh), fg: oklchHex(.27, Math.min(bc * .6 + .01, .04), bh),
+    c: [
+      oklchHex(bgL - .06, tint * 1.3, bh), ...normal, oklchHex(.4, Math.min(bc * .5 + .01, .035), bh),
+      oklchHex(.72, Math.min(bc * .5 + .01, .03), bh), ...bright, oklchHex(.19, Math.min(bc * .5 + .01, .03), bh),
+    ],
   };
 });
 
-export function colorsToml(t) {
-  const k = t.colors;
+// High contrast: each color starts from the design lightness and gets lighter
+// until it reaches the WCAG target against a near-black background.
+// 7:1 is WCAG AAA for normal text.
+const TARGET = { normal: 7, bright: 9, muted: 4.5 };
+
+const highContrastPalettes = rows.map((g, gi) => {
+  const r = rng(gi * 7919 + 13), bh = g.bg[2], bc = g.bg[1], bf = .55 + r() * .3;
+  const hs = g.h.map(h => h + (r() - .5) * 8);
+  const bg = oklchHex(.08, Math.min(bc * .8, .03), bh);
+  const normal = hs.map((h, k) => lighten(clampL(g.L[k], .7, .88), g.c, h, bg, TARGET.normal));
+  const bright = hs.map((h, k) => lighten(clampL(g.L[k] + .1, .82, .93), g.c * Math.max(bf, .8), h, bg, TARGET.bright));
+  return {
+    bh, bg, fg: oklchHex(.97, .008, bh),
+    c: [
+      oklchHex(.2, Math.min(bc + .01, .05), bh), ...normal, oklchHex(.9, .012, bh),
+      lighten(.6, Math.min(bc + .02, .06), bh, bg, TARGET.muted), ...bright, oklchHex(1, 0, bh),
+    ],
+  };
+});
+
+// Day high contrast: the day hues get darker until they reach the WCAG target
+// against a near-white background.
+const highContrastDayPalettes = rows.map((g, gi) => {
+  const r = rng(gi * 7919 + 13), bh = g.bg[2], bc = g.bg[1];
+  r();
+  const hs = g.h.map(h => h + (r() - .5) * 8);
+  const L = LIGHT[g.set];
+  const bg = oklchHex(.995, Math.min(bc * .2, .008), bh);
+  const normal = hs.map((h, k) => darken(Math.min(L[k], .5), g.c, h, bg, TARGET.normal));
+  const bright = hs.map((h, k) => darken(Math.min(L[k] - .07, .45), g.c * 1.05, h, bg, TARGET.bright));
+  return {
+    bh, bg, fg: oklchHex(.14, Math.min(bc * .6 + .01, .04), bh),
+    c: [
+      oklchHex(.94, Math.min(bc * .4, .02), bh), ...normal, oklchHex(.3, .02, bh),
+      darken(.62, Math.min(bc * .5 + .01, .03), bh, bg, TARGET.muted), ...bright, oklchHex(.08, .01, bh),
+    ],
+  };
+});
+
+const lower = x => x.toLowerCase();
+
+// Variant order, labels, and the suffix of the installed theme name.
+export const VARIANTS = [
+  { key: 'dark', label: 'Dark', title: '', suffix: '', mode: 'dark', renderer: 'night' },
+  { key: 'day', label: 'Day', title: 'Day', suffix: '-day', mode: 'light', renderer: 'day' },
+  { key: 'high-contrast', label: 'High contrast', title: 'High Contrast', suffix: '-high-contrast', mode: 'dark', renderer: 'night' },
+  { key: 'day-high-contrast', label: 'Day high contrast', title: 'Day High Contrast', suffix: '-day-high-contrast', mode: 'light', renderer: 'day' },
+  { key: 'oled', label: 'OLED', title: 'OLED', suffix: '-oled', mode: 'dark', renderer: 'night' },
+];
+
+function semantic(c, bg, fg, extra) {
+  const orange = extra.orange || orangeFor(c[1], c[3]);
+  return {
+    mode: extra.mode,
+    accent: c[5],
+    selection: extra.selection,
+    muted: c[8],
+    background: bg,
+    dark_background: extra.dark_background,
+    darker_background: extra.darker_background,
+    lighter_background: c[0],
+    foreground: fg,
+    dark_foreground: extra.dark_foreground,
+    light_foreground: c[7],
+    bright_foreground: c[15],
+    red: c[1], yellow: c[3], orange, green: c[2], cyan: c[6], blue: c[4], magenta: c[5],
+    brown: mix(orange, '#000000', extra.brown),
+    bright_red: c[9], bright_yellow: c[11], bright_green: c[10], bright_cyan: c[14], bright_blue: c[12], bright_magenta: c[13],
+  };
+}
+
+function variant(key, base, name, c, colors) {
+  const v = VARIANTS.find(x => x.key === key);
+  return { variant: key, label: v.label, install: `${base}${v.suffix}`, name: v.title ? `${name} ${v.title}` : name, ansi: c, icons: iconTheme(colors.accent), colors };
+}
+
+export const themes = darkPalettes.map((p, i) => {
+  const base = slugify(p.name);
+  const out = {};
+
+  // Dark: the design palette.
+  {
+    const c = p.c.map(lower), bg = lower(p.bg), fg = lower(p.fg);
+    out.dark = variant('dark', base, p.name, c, semantic(c, bg, fg, {
+      mode: 'dark', selection: mix(bg, c[5], .28),
+      dark_background: mix(bg, '#000000', .25), darker_background: mix(bg, '#000000', .5),
+      dark_foreground: mix(fg, bg, .35), brown: .5,
+    }));
+
+    // OLED: the design colors on true black. Panels stay black, surfaces get a dark tint.
+    const g = rows[i], bh = g.bg[2], bc = g.bg[1];
+    const oc = [...c];
+    oc[0] = lower(oklchHex(.15, Math.min(bc + .01, .05), bh));
+    out.oled = variant('oled', base, p.name, oc, semantic(oc, '#000000', fg, {
+      mode: 'dark', selection: mix('#000000', c[5], .3),
+      dark_background: '#000000', darker_background: '#000000',
+      dark_foreground: mix(fg, '#000000', .38), brown: .5,
+    }));
+  }
+
+  // Day
+  {
+    const d = dayPalettes[i], c = d.c.map(lower), bg = lower(d.bg), fg = lower(d.fg);
+    out.day = variant('day', base, p.name, c, semantic(c, bg, fg, {
+      mode: 'light', selection: mix(bg, c[5], .22),
+      dark_background: lower(oklchHex(d.bgL - .035, d.tint, d.bh)), darker_background: lower(oklchHex(d.bgL - .075, d.tint, d.bh)),
+      dark_foreground: lower(oklchHex(.55, Math.min(d.tint + .01, .03), d.bh)), brown: .4,
+    }));
+  }
+
+  // High contrast
+  {
+    const h = highContrastPalettes[i], c = h.c.map(lower), bg = lower(h.bg), fg = lower(h.fg);
+    const o = hexOklch(orangeFor(c[1], c[3]));
+    out['high-contrast'] = variant('high-contrast', base, p.name, c, semantic(c, bg, fg, {
+      mode: 'dark', selection: mix(bg, c[5], .38),
+      dark_background: mix(bg, '#000000', .3), darker_background: mix(bg, '#000000', .6),
+      dark_foreground: lower(lighten(.75, .015, h.bh, bg, TARGET.normal)), brown: .45,
+      orange: lower(lighten(o.L, o.C, o.h, bg, TARGET.normal)),
+    }));
+  }
+
+  // Day high contrast
+  {
+    const h = highContrastDayPalettes[i], c = h.c.map(lower), bg = lower(h.bg), fg = lower(h.fg);
+    const o = hexOklch(orangeFor(c[1], c[3]));
+    out['day-high-contrast'] = variant('day-high-contrast', base, p.name, c, semantic(c, bg, fg, {
+      mode: 'light', selection: mix(bg, c[5], .25),
+      dark_background: lower(oklchHex(.96, Math.min(rows[i].bg[1] * .3, .012), h.bh)), darker_background: lower(oklchHex(.92, Math.min(rows[i].bg[1] * .3, .012), h.bh)),
+      dark_foreground: lower(darken(.45, .02, h.bh, bg, TARGET.normal)), brown: .4,
+      orange: lower(darken(Math.min(o.L, .5), o.C, o.h, bg, TARGET.normal)),
+    }));
+  }
+
+  return { index: i + 1, name: p.name, slug: base, motif: motifFor(p.name), row: rows[i], variants: out };
+});
+
+export function colorsToml(v) {
+  const k = v.colors;
   const hx = h => `rgba(${h.slice(1)}ee)`;
   return `mode = "${k.mode}"
 

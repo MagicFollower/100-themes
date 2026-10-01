@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>100 Omarchy Themes</title>
-<meta name="description" content="100 neon themes for Omarchy. Each theme has a 16-color palette, an Omarchy wordmark background, and a background drawn for its colors.">
-<meta property="og:title" content="100 Omarchy Themes">
-<meta property="og:description" content="100 neon themes for Omarchy, with 200 backgrounds.">
+<title>500 Omarchy Themes</title>
+<meta name="description" content="500 themes for Omarchy: 100 neon palettes, each in 5 variants. Dark, day, high contrast, day high contrast and OLED.">
+<meta property="og:title" content="500 Omarchy Themes">
+<meta property="og:description" content="500 themes for Omarchy: 100 palettes × 5 variants, with 1000 backgrounds at 6K.">
 <meta property="og:image" content="https://bjarneo.github.io/100-themes/assets/mosaic.jpg">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
@@ -212,17 +212,29 @@ footer p { margin: 0 0 6px; max-width: 80ch; }
   .card, .toast { transition: none; }
   .card:hover { transform: none; }
 }
+
+/* Variant selector */
+.seg { display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 3px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line-2); }
+.seg button { cursor: pointer; border: 0; background: none; color: var(--text-2); padding: 8px 12px; border-radius: 9px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 7px; }
+.seg button i { width: 10px; height: 10px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(255,255,255,.25); }
+.seg button[aria-pressed="true"] { background: var(--text); color: var(--bg); }
+.dots { display: flex; gap: 4px; margin-left: auto; flex-shrink: 0; }
+.dots i { width: 9px; height: 9px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(255,255,255,.3); }
+.vtabs { display: flex; gap: 4px; padding: 10px 10px 0; flex-wrap: wrap; background: var(--d-darker, #000); }
+.vtab { cursor: pointer; padding: 7px 11px; border-radius: 8px; font-size: 12px; font-weight: 700; border: 1px solid transparent; background: none; color: var(--d-dim, var(--muted)); display: inline-flex; gap: 7px; align-items: center; }
+.vtab i { width: 10px; height: 10px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(255,255,255,.3); }
+.vtab[aria-selected="true"] { background: var(--d-accent); color: var(--d-darker); }
+.toolbar .seg { order: -1; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="top">
-    <a class="brand" href="#top" aria-label="100 Omarchy themes, home"><i class="wordmark" aria-hidden="true"></i><span>/ 100 themes</span></a>
+    <a class="brand" href="#top" aria-label="500 Omarchy themes, home"><i class="wordmark" aria-hidden="true"></i><span>/ 500 themes</span></a>
     <nav aria-label="Sections">
       <a href="#themes">Themes</a>
       <a href="#video">Video</a>
       <a href="#install">Install</a>
-      <a href="https://bjarneo.github.io/100-themes-day/">Day themes</a>
       <a href="https://github.com/bjarneo/100-themes">GitHub</a>
     </nav>
   </header>
@@ -230,29 +242,30 @@ footer p { margin: 0 0 6px; max-width: 80ch; }
   <main id="top">
     <div class="hero">
       <div class="hero-text">
-      <div class="eyebrow">Omarchy · Themes · Backgrounds</div>
-      <h1>100 <em>neon</em> themes for Omarchy</h1>
-      <p class="lead">Each theme has a 16-color ANSI palette, a background with the Omarchy wordmark, and a background drawn for its colors. Every screenshot shows the same workspace with the theme applied. Every theme also has a <a href="https://bjarneo.github.io/100-themes-day/">light day version</a>.</p>
-      <div class="stats"><span><b>100</b> themes</span><span><b>200</b> backgrounds</span><span><b>16</b> ANSI colors each</span><span><b>6K</b> backgrounds, 6144×3456</span></div>
+      <div class="eyebrow">Omarchy · 100 themes × 5 variants</div>
+      <h1><em>500</em> themes for Omarchy</h1>
+      <p class="lead">100 neon palettes, and every palette comes in 5 variants: dark, day, high contrast, day high contrast and OLED. Each variant has a background with the Omarchy wordmark and a background drawn for its colors. Every screenshot shows the same workspace with the theme applied.</p>
+      <div class="stats"><span><b>100</b> palettes</span><span><b>5</b> variants each</span><span><b>500</b> Omarchy themes</span><span><b>1000</b> backgrounds at 6K</span></div>
       <div class="cta">
         <a class="btn primary" href="#themes">Browse the themes</a>
         <a class="btn" href="#install">Install</a>
         <a class="btn" href="https://github.com/bjarneo/100-themes">View on GitHub</a>
       </div>
       </div>
-      <figure class="mosaic"><img src="assets/mosaic.jpg" alt="All 100 themes applied to the same workspace, in a 10 by 10 grid" width="1920" height="1200"></figure>
+      <figure class="mosaic"><img src="assets/mosaic.jpg" alt="All 500 themes applied to the same workspace. Each row shows 5 themes in their 5 variants." width="1900" height="960"></figure>
     </div>
 
     <section id="video" aria-labelledby="video-title">
-      <h2 id="video-title">All 100 in 90 seconds</h2>
-      <p class="sub">One theme per beat. The music is “Sashimi Lo-Fi”.</p>
+      <h2 id="video-title">50 of the 500</h2>
+      <p class="sub">10 themes from each variant, one per beat. The music is “Sashimi Lo-Fi”.</p>
       <video class="video" controls playsinline preload="metadata" poster="assets/mosaic.jpg" src="assets/promo.mp4"></video>
     </section>
 
     <section id="themes" aria-labelledby="themes-title">
       <h2 id="themes-title">Themes</h2>
-      <p class="sub">Select a theme to see both backgrounds, copy a color, or get the install command.</p>
+      <p class="sub">Pick a variant for the whole gallery. Select a theme to see all 5 variants, both backgrounds, the colors, and the install command.</p>
       <div class="toolbar">
+        <div class="seg" id="vseg" role="group" aria-label="Variant"></div>
         <input class="search" id="q" type="search" placeholder="Search by name" aria-label="Search themes by name" autocomplete="off">
         <div class="chips" id="chips" role="group" aria-label="Filter by background motif"></div>
         <span class="count" id="count" aria-live="polite"></span>
@@ -263,34 +276,37 @@ footer p { margin: 0 0 6px; max-width: 80ch; }
 
     <section id="install" aria-labelledby="install-title">
       <h2 id="install-title">Install</h2>
-      <p class="sub"><code>install.sh</code> copies themes into <code>~/.config/omarchy/themes</code>. It never replaces a theme that you made.</p>
+      <p class="sub"><code>install.sh</code> copies themes into <code>~/.config/omarchy/themes</code>. It installs all 5 variants of a theme unless you pick some with <code>--variant</code>. It never replaces a theme that you made.</p>
       <div class="install-grid">
         <div>
-          <h3>One theme, no clone</h3>
+          <h3>One theme, all 5 variants, no clone</h3>
 <pre class="code"><button class="copy" data-copy="curl -fsSL https://bjarneo.github.io/100-themes/install.sh | bash -s -- synthwave --set">Copy</button><span class="p">$ </span>curl -fsSL https://bjarneo.github.io/100-themes/install.sh \
     | bash -s -- synthwave --set</pre>
         </div>
         <div>
-          <h3>All 100 themes</h3>
+          <h3>One variant only</h3>
+<pre class="code"><button class="copy" data-copy="curl -fsSL https://bjarneo.github.io/100-themes/install.sh | bash -s -- synthwave --variant oled --set">Copy</button><span class="p">$ </span>curl -fsSL https://bjarneo.github.io/100-themes/install.sh \
+    | bash -s -- synthwave --variant oled --set</pre>
+        </div>
+        <div>
+          <h3>All 500 themes</h3>
 <pre class="code"><button class="copy" data-copy="git clone --depth 1 https://github.com/bjarneo/100-themes ~/.local/share/100-themes
 ~/.local/share/100-themes/install.sh --all
-omarchy theme set synthwave">Copy</button><span class="p">$ </span>git clone --depth 1 https://github.com/bjarneo/100-themes ~/.local/share/100-themes
+omarchy theme set synthwave-oled">Copy</button><span class="p">$ </span>git clone --depth 1 https://github.com/bjarneo/100-themes ~/.local/share/100-themes
 <span class="p">$ </span>~/.local/share/100-themes/install.sh --all
-<span class="p">$ </span>omarchy theme set synthwave</pre>
+<span class="p">$ </span>omarchy theme set synthwave-oled</pre>
         </div>
-      </div>
-      <div class="install-grid" style="margin-top:16px">
         <div>
           <h3>Apply with Aether</h3>
-          <p class="sub" style="margin:0">Select a theme, then select <b>Apply with Aether</b>. <a href="https://github.com/omacom/aether">Aether</a> downloads <code>colors.toml</code> and the background from this site. It shows a preview and asks before it applies the theme. <b>Install as Omarchy theme</b> adds the theme to the Omarchy theme picker.</p>
+          <p class="sub" style="margin:0">Select a theme and a variant, then select <b>Apply with Aether</b>. <a href="https://github.com/omacom/aether">Aether</a> downloads <code>colors.toml</code> and a 3840×2160 copy of the background, then applies them at once. <b>Install as Omarchy theme</b> adds the variant to the Omarchy theme picker.</p>
         </div>
       </div>
-      <p class="sub" style="margin-top:18px">Other options: <code>--list</code>, <code>--update</code>, <code>--remove</code>, <code>--link</code> and <code>--force</code>. Run <code>install.sh --help</code> for details.</p>
+      <p class="sub" style="margin-top:18px">Variants: <code>dark</code>, <code>day</code>, <code>high-contrast</code>, <code>day-high-contrast</code> and <code>oled</code>. Other options: <code>--all</code>, <code>--list</code>, <code>--update</code>, <code>--remove</code>, <code>--link</code> and <code>--force</code>. Run <code>install.sh --help</code> for details.</p>
     </section>
   </main>
 
   <footer>
-    <p>The palettes come from the Neon ANSI Palette design. Each palette uses OKLCH lightness and chroma values, so the 16 colors keep an even contrast.</p>
+    <p>The palettes come from the Neon ANSI Palette design. The day and high contrast variants keep each hue and chroma and change only the lightness. High contrast colors reach 7:1, the WCAG AAA level. OLED variants use a pure black background.</p>
     <p>Backgrounds are drawn with canvas scripts in <a href="https://github.com/bjarneo/100-themes/tree/main/tools">tools/</a>. Omarchy is at <a href="https://omarchy.org">omarchy.org</a>.</p>
   </footer>
 </div>
@@ -298,7 +314,8 @@ omarchy theme set synthwave">Copy</button><span class="p">$ </span>git clone --d
 <dialog id="dlg" aria-labelledby="d-name">
   <div class="d-body">
     <div class="d-media">
-      <img id="d-img" alt="" width="1920" height="1200">
+      <div class="vtabs" id="d-vtabs" role="tablist" aria-label="Variant"></div>
+      <img id="d-img" alt="" width="1440" height="900">
       <div class="tabs" role="tablist" aria-label="Image">
         <button class="tab" role="tab" data-view="shot">Workspace 7</button>
         <button class="tab" role="tab" data-view="wordmark">Wordmark background</button>
@@ -339,17 +356,19 @@ omarchy theme set synthwave">Copy</button><span class="p">$ </span>git clone --d
 <script>
 const REPO = 'https://github.com/bjarneo/100-themes';
 const SITE = 'https://bjarneo.github.io/100-themes';
+const RAW = 'https://raw.githubusercontent.com/bjarneo/100-themes/main';
 const NAMES = ['black', 'red', 'green', 'yellow', 'blue', 'magenta', 'cyan', 'white'];
 const MOTIFS = {
   'sunset-grid': 'sunset grid', 'code-rain': 'code rain', nebula: 'nebula', aurora: 'aurora', skyline: 'skyline',
   equalizer: 'equalizer', waveform: 'waveform', blobs: 'light spots', depths: 'deep water', embers: 'embers',
   pixels: 'pixel art', scanlines: 'VHS', contours: 'contours', tubes: 'neon tubes', planet: 'planet',
 };
-const T = window.THEMES;
+const { variants: VARIANTS, themes: T } = window.THEMES;
 const $ = id => document.getElementById(id);
 const pad = n => String(n).padStart(3, '0');
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-let motif = 'all', current = -1, view = 'shot';
+let motif = 'all', variant = 'dark', current = -1, view = 'shot';
+try { const v = localStorage.getItem('variant'); if (VARIANTS.some(x => x.key === v)) variant = v; } catch {}
 
 function toast(msg, ms = 1200) {
   const el = $('toast'); el.textContent = msg; el.classList.add('show');
@@ -359,9 +378,17 @@ function copy(text, msg = 'Copied') {
   navigator.clipboard?.writeText(text).then(() => toast(msg), () => toast('Copy failed'));
 }
 
+// Variant selector: the dot shows the background of the first theme in that variant.
+$('vseg').innerHTML = VARIANTS.map(v => `<button data-variant="${v.key}" aria-pressed="${v.key === variant}"><i style="background:${T[0].variants[v.key].colors.background}"></i>${esc(v.label)}</button>`).join('');
+$('vseg').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  variant = b.dataset.variant;
+  try { localStorage.setItem('variant', variant); } catch {}
+  $('vseg').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b));
+  paintCards();
+});
+
 // Filter chips
-const counts = {};
-T.forEach(t => counts[t.motif] = (counts[t.motif] || 0) + 1);
 $('chips').innerHTML = [['all', 'All'], ...Object.entries(MOTIFS)].map(([k, v]) =>
   `<button class="chip" data-motif="${k}" aria-pressed="${k === 'all'}">${esc(v)}</button>`).join('');
 $('chips').addEventListener('click', e => {
@@ -373,15 +400,24 @@ $('chips').addEventListener('click', e => {
 $('q').addEventListener('input', render);
 
 // Cards
-$('grid').innerHTML = T.map((t, i) => {
-  const c = t.colors;
-  return `<button class="card" data-i="${i}" style="--card-bg:${c.background};--card-fg:${c.foreground};--card-dim:${c.muted};--card-accent:${c.accent};--card-glow:${c.accent}88">
-    <img src="assets/shots/${t.slug}.webp" alt="${esc(t.name)} applied to workspace 7" width="1440" height="900" loading="lazy" decoding="async">
-    <span class="meta"><span class="num">${pad(t.index)}</span><span class="name">${esc(t.name)}</span><span class="motif">${esc(MOTIFS[t.motif])}</span></span>
-    <span class="strip">${t.ansi.map(h => `<i style="background:${h}"></i>`).join('')}</span>
-  </button>`;
-}).join('');
-$('grid').addEventListener('click', e => { const b = e.target.closest('.card'); if (b) open(+b.dataset.i); });
+$('grid').innerHTML = T.map((t, i) => `<button class="card" data-i="${i}">
+    <img alt="" width="1440" height="900" loading="lazy" decoding="async">
+    <span class="meta"><span class="num">${pad(t.index)}</span><span class="name">${esc(t.name)}</span><span class="dots">${VARIANTS.map(v => `<i title="${esc(v.label)}" style="background:${t.variants[v.key].colors.background}"></i>`).join('')}</span></span>
+    <span class="strip"></span>
+  </button>`).join('');
+$('grid').addEventListener('click', e => { const b = e.target.closest('.card'); if (b) open(+b.dataset.i, variant); });
+
+function paintCards() {
+  $('grid').querySelectorAll('.card').forEach(el => {
+    const t = T[+el.dataset.i], v = t.variants[variant], c = v.colors;
+    Object.entries({ '--card-bg': c.background, '--card-fg': c.foreground, '--card-dim': c.muted, '--card-accent': c.accent, '--card-glow': c.accent + '88' })
+      .forEach(([k, val]) => el.style.setProperty(k, val));
+    const img = el.querySelector('img');
+    img.src = `assets/shots/${t.slug}/${variant}.webp`;
+    img.alt = `${v.name} applied to workspace 7`;
+    el.querySelector('.strip').innerHTML = v.ansi.map(h => `<i style="background:${h}"></i>`).join('');
+  });
+}
 
 function render() {
   const q = $('q').value.trim().toLowerCase();
@@ -391,57 +427,65 @@ function render() {
     const ok = (motif === 'all' || t.motif === motif) && (!q || t.name.toLowerCase().includes(q) || t.slug.includes(q));
     el.hidden = !ok; if (ok) shown++;
   });
-  $('count').textContent = `${shown} of ${T.length} themes`;
+  $('count').textContent = `${shown} of ${T.length} themes · ${shown * VARIANTS.length} with variants`;
   $('empty').hidden = shown > 0;
 }
+paintCards();
 render();
 
 // Dialog
+let dvariant = variant;
+const bgFile = (t, kind) => kind === 'wordmark' ? '0-omarchy-wordmark' : `1-${t.motif}`;
 function imageFor(t) {
-  return { shot: `${t.slug}/preview.png`, wordmark: `${t.slug}/backgrounds/0-omarchy-wordmark.jpg`, native: `${t.slug}/backgrounds/1-${t.motif}.jpg` }[view];
+  if (view === 'shot') return `assets/shots/${t.slug}/${dvariant}.webp`;
+  return `assets/bg/${t.slug}/${dvariant}/${bgFile(t, view)}.webp`;
 }
 // aether:// links, built like the links on the omarchy-themes site. Aether
-// downloads the files from this site over HTTPS and stops a download after
-// 60 seconds, so the links use the 3840x2160 copies in assets/aether.
-// silent=true applies without the Aether window.
+// stops a download after 60 seconds, so the links use the 3840x2160 copies in
+// assets/aether. silent=true applies without the Aether window.
 function aetherUrl(t, extra = {}) {
-  const bg = view === 'wordmark' ? '0-omarchy-wordmark.jpg' : `1-${t.motif}.jpg`;
-  const q = new URLSearchParams({ colors: `${SITE}/${t.slug}/colors.toml`, wallpaper: `${SITE}/assets/aether/${t.slug}/${bg}`, ...extra });
+  const bg = (view === 'wordmark' ? '0-omarchy-wordmark' : `1-${t.motif}`) + '.jpg';
+  const q = new URLSearchParams({ colors: `${SITE}/${t.slug}/${dvariant}/colors.toml`, wallpaper: `${SITE}/assets/aether/${t.slug}/${dvariant}/${bg}`, ...extra });
   return `aether://apply?${q}`;
 }
 function updateAether(t) {
+  const v = t.variants[dvariant];
   $('a-apply').href = aetherUrl(t, { silent: 'true' });
-  $('a-install').href = aetherUrl(t, { silent: 'true', as_omarchy_theme: t.slug });
+  $('a-install').href = aetherUrl(t, { silent: 'true', as_omarchy_theme: v.install });
   $('a-edit').href = aetherUrl(t, { edit: 'true' });
   const bg = view === 'wordmark' ? 'the wordmark background' : 'the native background';
-  $('a-hint').innerHTML = `Uses ${bg}. Needs <a href="https://github.com/omacom/aether">Aether</a>. Apply and Install change your theme at once. Install stops if a theme named <code>${t.slug}</code> exists. Open in editor changes nothing until you select Apply.`;
+  $('a-hint').innerHTML = `Uses ${bg}. Needs <a href="https://github.com/omacom/aether">Aether</a>. Apply and Install change your theme at once. Install stops if a theme named <code>${v.install}</code> exists. Open in editor changes nothing until you select Apply.`;
 }
-function show(v) {
-  view = v; const t = T[current];
+function show(vw) {
+  view = vw; const t = T[current], v = t.variants[dvariant];
   updateAether(t);
   $('d-img').src = imageFor(t);
-  $('d-img').alt = { shot: `${t.name} applied to workspace 7`, wordmark: `${t.name} background with the Omarchy wordmark`, native: `${t.name} ${MOTIFS[t.motif]} background` }[v];
-  document.querySelectorAll('.tab').forEach(b => b.setAttribute('aria-selected', b.dataset.view === v));
+  $('d-img').alt = { shot: `${v.name} applied to workspace 7`, wordmark: `${v.name} background with the Omarchy wordmark`, native: `${v.name} ${MOTIFS[t.motif]} background` }[vw];
+  document.querySelectorAll('.tab').forEach(b => b.setAttribute('aria-selected', b.dataset.view === vw));
 }
-function open(i) {
+function open(i, vkey = dvariant) {
   current = (i + T.length) % T.length;
-  const t = T[current], c = t.colors, d = $('dlg');
-  Object.entries({ '--d-bg': c.background, '--d-darker': c.darker_background, '--d-fg': c.foreground, '--d-dim': c.dark_foreground,
-    '--d-accent': c.accent, '--d-glow': c.accent + '66', '--d-line': c.lighter_background, '--d-cyan': c.cyan }).forEach(([k, v]) => d.style.setProperty(k, v));
-  $('d-num').textContent = `${pad(t.index)} / ${T.length}`;
-  $('d-name').textContent = t.name;
-  $('d-meta').innerHTML = [['Background', c.background], ['Foreground', c.foreground], ['Accent', c.accent], ['Icons', t.icons], ['Motif', MOTIFS[t.motif]]]
-    .map(([k, v]) => `<dt>${k}</dt><dd>${v.startsWith('#') ? `<span style="color:${v}">■</span> ${v}` : esc(v)}</dd>`).join('');
-  $('d-sw').innerHTML = t.ansi.map((h, k) => `<button class="sw" data-hex="${h}" title="${k > 7 ? 'bright ' : ''}${NAMES[k % 8]} ${h}"><i style="background:${h}"></i><span>${h.slice(1)}</span></button>`).join('');
-  const cmd = `curl -fsSL ${SITE}/install.sh | bash -s -- ${t.slug} --set`;
-  $('d-install').innerHTML = `<button class="copy" data-copy="${esc(cmd)}">Copy</button><span class="p">$ </span>curl -fsSL \\\n    ${SITE}/install.sh \\\n    | bash -s -- ${t.slug} --set`;
+  dvariant = vkey;
+  const t = T[current], v = t.variants[dvariant], c = v.colors, d = $('dlg');
+  Object.entries({ '--d-bg': c.background, '--d-darker': c.darker_background === c.background ? c.lighter_background : c.darker_background, '--d-fg': c.foreground, '--d-dim': c.dark_foreground,
+    '--d-accent': c.accent, '--d-glow': c.accent + '66', '--d-line': c.lighter_background, '--d-cyan': c.cyan }).forEach(([k, val]) => d.style.setProperty(k, val));
+  $('d-vtabs').innerHTML = VARIANTS.map(x => `<button class="vtab" role="tab" data-variant="${x.key}" aria-selected="${x.key === dvariant}"><i style="background:${t.variants[x.key].colors.background}"></i>${esc(x.label)}</button>`).join('');
+  $('d-num').textContent = `${pad(t.index)} / ${T.length} · ${v.label}`;
+  $('d-name').textContent = v.name;
+  $('d-meta').innerHTML = [['Theme name', v.install], ['Background', c.background], ['Foreground', c.foreground], ['Accent', c.accent], ['Icons', v.icons], ['Motif', MOTIFS[t.motif]]]
+    .map(([k, val]) => `<dt>${k}</dt><dd>${val.startsWith('#') ? `<span style="color:${val}">■</span> ${val}` : esc(val)}</dd>`).join('');
+  $('d-sw').innerHTML = v.ansi.map((h, k) => `<button class="sw" data-hex="${h}" title="${k > 7 ? 'bright ' : ''}${NAMES[k % 8]} ${h}"><i style="background:${h}"></i><span>${h.slice(1)}</span></button>`).join('');
+  const flag = dvariant === 'dark' ? '' : ` --variant ${dvariant}`;
+  const cmd = `curl -fsSL ${SITE}/install.sh | bash -s -- ${t.slug}${flag} --set`;
+  $('d-install').innerHTML = `<button class="copy" data-copy="${esc(cmd)}">Copy</button><span class="p">$ </span>curl -fsSL \\\n    ${SITE}/install.sh \\\n    | bash -s -- ${t.slug}${flag} --set`;
   $('d-files').innerHTML = [
-    ['colors.toml', `${t.slug}/colors.toml`], ['preview.png', `${t.slug}/preview.png`],
-    ['Folder on GitHub', `${REPO}/tree/main/${t.slug}`],
+    ['colors.toml', `${t.slug}/${dvariant}/colors.toml`], ['preview.png', `${RAW}/${t.slug}/${dvariant}/preview.png`],
+    ['6K wordmark', `${RAW}/${t.slug}/${dvariant}/backgrounds/0-omarchy-wordmark.jpg`], ['6K native', `${RAW}/${t.slug}/${dvariant}/backgrounds/1-${t.motif}.jpg`],
+    ['Folder on GitHub', `${REPO}/tree/main/${t.slug}/${dvariant}`],
   ].map(([n, h]) => `<a href="${h}">${n}</a>`).join('');
   show(view);
   if (!d.open) d.showModal();
-  history.replaceState(null, '', `#${t.slug}`);
+  history.replaceState(null, '', `#${t.slug}${dvariant === 'dark' ? '' : '/' + dvariant}`);
 }
 function close() { $('dlg').close(); }
 $('dlg').addEventListener('close', () => history.replaceState(null, '', location.pathname + location.search));
@@ -449,6 +493,7 @@ $('dlg').addEventListener('click', e => { if (e.target === $('dlg')) close(); })
 $('d-close').addEventListener('click', close);
 $('d-prev').addEventListener('click', () => open(current - 1));
 $('d-next').addEventListener('click', () => open(current + 1));
+$('d-vtabs').addEventListener('click', e => { const b = e.target.closest('.vtab'); if (b) open(current, b.dataset.variant); });
 document.querySelector('.tabs').addEventListener('click', e => { const b = e.target.closest('.tab'); if (b) show(b.dataset.view); });
 $('d-sw').addEventListener('click', e => { const b = e.target.closest('.sw'); if (b) copy(b.dataset.hex, `Copied ${b.dataset.hex}`); });
 // The browser cannot tell if Aether accepted the link, so confirm the click only.
@@ -463,9 +508,10 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowLeft') open(current - 1);
 });
 
-// Deep link: index.html#synthwave opens that theme
-const fromHash = T.findIndex(t => `#${t.slug}` === location.hash);
-if (fromHash >= 0) open(fromHash);
+// Deep links: #synthwave opens the dark variant, #synthwave/oled opens OLED.
+const [hashSlug, hashVariant] = location.hash.slice(1).split('/');
+const fromHash = T.findIndex(t => t.slug === hashSlug);
+if (fromHash >= 0) open(fromHash, VARIANTS.some(v => v.key === hashVariant) ? hashVariant : 'dark');
 </script>
 </body>
 </html>
