@@ -106,7 +106,7 @@ function section(seg, f, n) {
   }
   const a = ease(f / 6);
   text(seg.label.toUpperCase(), W * .2, H * .5, 150, t.colors.foreground, { bold: true, alpha: a, baseline: 'middle', glow: rgba(t.colors.accent, .6), blur: 40 });
-  text(`${seg.part} of 5  ·  10 of 100 shown`, W * .2 + 6, H * .5 + 120, 36, t.colors.dark_foreground, { alpha: ease((f - 4) / 8), spacing: '3px' });
+  text(`${seg.part} of 5  ·  ${S.perVariant} of 100 shown`, W * .2 + 6, H * .5 + 120, 36, t.colors.dark_foreground, { alpha: ease((f - 4) / 8), spacing: '3px' });
   chip(t, a);
 }
 
@@ -128,15 +128,20 @@ function clip(j, f, n) {
   // Name label: variant on the first line, theme name on the second
   const a = ease(f / 6), dx = (1 - a) * -40;
   ctx.save(); ctx.globalAlpha = a;
+  const top = `${c.label.toUpperCase()}  ·  ${String(c.n).padStart(3, '0')} / ${S.clips.length}`;
   ctx.font = `bold 64px ${MONO}`;
   const nameW = ctx.measureText(c.name).width;
-  const bx = SIDE + 40 + dx, bh = 150, by = H - 60 - bh, bw = Math.max(nameW, 380) + 72;
+  ctx.font = `26px ${MONO}`; ctx.letterSpacing = '2px';
+  const topW = ctx.measureText(top).width;
+  ctx.letterSpacing = '0px';
+  // The box fits the wider of the 2 lines.
+  const bx = SIDE + 40 + dx, bh = 150, by = H - 60 - bh, bw = Math.max(nameW, topW) + 72;
   ctx.fillStyle = rgba(t.colors.background, .93); ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, 16); ctx.fill();
   const border = ctx.createLinearGradient(bx, 0, bx + bw, 0);
   border.addColorStop(0, t.ansi[6]); border.addColorStop(1, t.ansi[5]);
   ctx.lineWidth = 3; ctx.strokeStyle = border; ctx.stroke();
   ctx.restore();
-  text(`${c.label.toUpperCase()}  ·  ${String(c.n).padStart(2, '0')} / 50`, bx + 36, by + 50, 26, t.colors.dark_foreground, { alpha: a, spacing: '2px' });
+  text(top, bx + 36, by + 50, 26, t.colors.dark_foreground, { alpha: a, spacing: '2px' });
   text(c.name, bx + 36, by + 118, 64, t.colors.bright_foreground, { bold: true, alpha: a, glow: rgba(t.colors.accent, .7), blur: 22 });
   chip(t);
   const p = (j + f / n) / S.clips.length;
@@ -154,14 +159,14 @@ function outro(f, n) {
   const iw = W * z, ih = iw * wall.height / wall.width;
   ctx.save(); ctx.globalAlpha = ease(f / 8); ctx.drawImage(wall, (W - iw) / 2, (H - ih) / 2, iw, ih); ctx.restore();
   ctx.fillStyle = rgba(t.colors.darker_background, .78 * ease((f - 34) / 12)); ctx.fillRect(0, 0, W, H);
-  const lines = [['YOU SAW 50.', 10, 48, t.colors.foreground], ['450 MORE ARE WAITING.', 22, 48, t.colors.foreground]];
+  const lines = [[`YOU SAW ${S.clips.length}.`, 10, 48, t.colors.foreground], [`${S.total - S.clips.length} MORE ARE WAITING.`, 22, 48, t.colors.foreground]];
   lines.forEach(([s, start, size, color], i) => {
     const a = ease((f - start) / 8) * (1 - ease((f - 32) / 8));
     text(s, W / 2, H * (.45 + i * .1), size, color, { align: 'center', bold: true, alpha: a, spacing: '6px', glow: 'rgba(0,0,0,.9)', blur: 30 });
   });
   const b = ease((f - 40) / 10);
   glowLogo((W - 640) / 2, H * .24, 640, t, b);
-  text('500 THEMES', W / 2, H * .58, 96, t.ansi[13], { align: 'center', bold: true, alpha: b, spacing: '10px', glow: rgba(t.colors.accent, .9), blur: 40 });
+  text(`${S.total} THEMES`, W / 2, H * .58, 96, t.ansi[13], { align: 'center', bold: true, alpha: b, spacing: '10px', glow: rgba(t.colors.accent, .9), blur: 40 });
   text('100 themes × dark, day, high contrast, day high contrast, OLED', W / 2, H * .66, 28, t.colors.foreground, { align: 'center', alpha: ease((f - 48) / 10) });
   text(S.url, W / 2, H * .74, 36, t.ansi[14], { align: 'center', bold: true, alpha: ease((f - 54) / 10), glow: rgba(t.ansi[6], .6) });
   fade(f, n, true);

@@ -256,8 +256,8 @@ footer p { margin: 0 0 6px; max-width: 80ch; }
     </div>
 
     <section id="video" aria-labelledby="video-title">
-      <h2 id="video-title">50 of the 500</h2>
-      <p class="sub">10 themes from each variant, one per beat. The music is “Sashimi Lo-Fi”.</p>
+      <h2 id="video-title">100 of the 500</h2>
+      <p class="sub">Every theme once, 20 from each variant, one per beat. The music is “Sashimi Lo-Fi”.</p>
       <video class="video" controls playsinline preload="metadata" poster="assets/mosaic.jpg" src="assets/promo.mp4"></video>
     </section>
 
@@ -407,12 +407,18 @@ $('grid').innerHTML = T.map((t, i) => `<button class="card" data-i="${i}">
   </button>`).join('');
 $('grid').addEventListener('click', e => { const b = e.target.closest('.card'); if (b) open(+b.dataset.i, variant); });
 
+// A variant without a screenshot shows its native background instead.
+function fallback(img, src) {
+  img.onerror = () => { img.onerror = null; img.src = src; };
+}
+
 function paintCards() {
   $('grid').querySelectorAll('.card').forEach(el => {
     const t = T[+el.dataset.i], v = t.variants[variant], c = v.colors;
     Object.entries({ '--card-bg': c.background, '--card-fg': c.foreground, '--card-dim': c.muted, '--card-accent': c.accent, '--card-glow': c.accent + '88' })
       .forEach(([k, val]) => el.style.setProperty(k, val));
     const img = el.querySelector('img');
+    fallback(img, `assets/bg/${t.slug}/${variant}/1-${t.motif}.webp`);
     img.src = `assets/shots/${t.slug}/${variant}.webp`;
     img.alt = `${v.name} applied to workspace 7`;
     el.querySelector('.strip').innerHTML = v.ansi.map(h => `<i style="background:${h}"></i>`).join('');
@@ -459,6 +465,7 @@ function updateAether(t) {
 function show(vw) {
   view = vw; const t = T[current], v = t.variants[dvariant];
   updateAether(t);
+  fallback($('d-img'), `assets/bg/${t.slug}/${dvariant}/1-${t.motif}.webp`);
   $('d-img').src = imageFor(t);
   $('d-img').alt = { shot: `${v.name} applied to workspace 7`, wordmark: `${v.name} background with the Omarchy wordmark`, native: `${v.name} ${MOTIFS[t.motif]} background` }[vw];
   document.querySelectorAll('.tab').forEach(b => b.setAttribute('aria-selected', b.dataset.view === vw));

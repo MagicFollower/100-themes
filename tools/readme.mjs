@@ -146,7 +146,7 @@ const readme = `# 500 Omarchy themes
 This repo has 100 neon palettes for [Omarchy](https://omarchy.org), and each palette comes in 5 variants. That makes 500 Omarchy themes. Each variant has a 16-color ANSI palette, a background with the Omarchy wordmark, and a background drawn for its colors.
 
 - Gallery: [${SITE.replace('https://', '')}](${SITE})
-- Promo video: [\`assets/promo.mp4\`](assets/promo.mp4), 50 of the 500 themes in under a minute
+- Promo video: [\`assets/promo.mp4\`](assets/promo.mp4), every theme once, 20 from each variant
 - Backgrounds: 1000 at 6K, 6144×3456
 
 ## Variants
@@ -313,7 +313,7 @@ The \`tools/\` folder has every script that made this repo. You need Node.js 22 
 | \`node tools/render.mjs [theme...]\` | Renders the backgrounds at 6144×3456 with headless Chromium. Set \`VARIANTS=oled\` to render some variants, or \`SIZE=3840x2160\` for another size. |
 | \`tools/capture.sh [--variant list] [theme...]\` | Applies each variant, takes a screenshot of workspace 7, and writes \`preview.png\` |
 | \`node tools/assets.mjs\` | Writes the Aether copies, the gallery previews, the variant strips and the mosaic |
-| \`node tools/promo.mjs <song.mp3>\` | Renders \`assets/promo.mp4\`, 10 themes from each variant, one per beat |
+| \`node tools/promo.mjs <song.mp3>\` | Renders \`assets/promo.mp4\`, every theme once, 20 from each variant, one per beat |
 | \`node tools/readme.mjs\` | Writes this README |
 
 \`tools/capture.sh\` changes your desktop while it runs. It switches to workspace 7 and applies each variant. When it stops, it applies your original theme again and removes the links that it added. If another workspace becomes active, the script stops before it takes a screenshot.
